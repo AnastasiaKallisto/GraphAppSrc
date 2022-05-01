@@ -15,15 +15,13 @@ public class Graph {
         listOfNumbers.add(current);
         vertices.put(current, vertexMap.get(current));
         int n = vertexMap.size();
-        double c = 1;
         while (current < n) {
             if (Math.random() > 0.4) {
                 prev = current;
                 current = vertices.lastKey()+1;
                 vertices.put(current,vertexMap.get(current));
                 listOfNumbers.add(current);
-                c+=1;
-                edges.add(new Edge(vertexMap.get(prev), vertexMap.get(current), c));
+                edges.add(new Edge(vertexMap.get(prev), vertexMap.get(current), 0));
             } else {
                 if (prev > 1) {
                     prev = listOfNumbers.get((int)Math.floor(Math.random()*(listOfNumbers.size()-1)));
@@ -36,9 +34,8 @@ public class Graph {
             current = (int) (Math.random() * n);
             prev = (int) (Math.random() * n);
             if (prev != current && prev != 0 && current != 0) {
-                c+=1;
-                if (!edges.contains(new Edge(vertexMap.get(prev), vertexMap.get(current), c))){
-                    edges.add(new Edge(vertexMap.get(prev), vertexMap.get(current), c));
+                if (!edges.contains(new Edge(vertexMap.get(prev), vertexMap.get(current), 0))){
+                    edges.add(new Edge(vertexMap.get(prev), vertexMap.get(current), 0));
                 }
             }
         }

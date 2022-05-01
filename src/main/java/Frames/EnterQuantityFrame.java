@@ -52,6 +52,9 @@ public class EnterQuantityFrame extends JFrame
     public Integer getQuantity() {
         try {
             quantity = Integer.parseInt(quantityTextField.getText());
+            if (quantity<1){
+                throw new NumberFormatException();
+            }
             quantityTextField.setText("");
             dispose();
             if (!frame.isGraphPainted()) {

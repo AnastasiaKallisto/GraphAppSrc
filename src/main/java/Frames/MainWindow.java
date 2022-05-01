@@ -6,7 +6,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.security.spec.ECGenParameterSpec;
 import java.util.*;
 import java.util.List;
 
@@ -22,9 +21,11 @@ public class MainWindow extends JFrame {
     private Map<Integer, Vertex> vertices;
     private Graphics2D graphics2D;
     private Set<Edge> graph;
-    private ArrayList<Edge> minSpanningTree;
+    private ArrayList<Edge> minSpanningTreeCrascal;
+    private ArrayList<Edge> minSpanningTreePrim;
     private boolean isGraphPainted;
-    private boolean isMinSpanningTreePainted;
+    private boolean isMinSpanningTreePaintedCrascal;
+    private boolean isMinSpanningTreePaintedPrim;
     private EnterQuantityFrame enterQuantityFrame;
 
     public static void main(String[] args) {
@@ -49,14 +50,16 @@ public class MainWindow extends JFrame {
         buttonsPanel.add(clearButton);
         this.getContentPane().add(buttonsPanel, BorderLayout.WEST);
         graph = null;
-        minSpanningTree = null;
+        minSpanningTreeCrascal = null;
+        minSpanningTreePrim = null;
         setVisible(true);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
     }
 
     public void paint(Graphics g) {
         super.paint(g);
-        isMinSpanningTreePainted = false;
+        isMinSpanningTreePaintedCrascal = false;
+        isMinSpanningTreePaintedPrim = false;
         graphics2D = (Graphics2D) getGraphics();
         generateGraphButton.addActionListener(new ActionListener() {
             @Override
@@ -78,14 +81,69 @@ public class MainWindow extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (isGraphPainted) {
-                    if (!isMinSpanningTreePainted) {
+                    if (!isMinSpanningTreePaintedCrascal) {
                         returnMinSpanningTreeCrascal();
-                        paintMinSpanningTree();
+                        paintMinSpanningTree(5, minSpanningTreeCrascal, Color.RED);
+                    }
+                }
+            }
+        });
+        primButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (isGraphPainted) {
+                    if (!isMinSpanningTreePaintedPrim) {
+                        returnMinSpanningTreePrim();
+                        paintMinSpanningTree(-5, minSpanningTreePrim, Color.BLUE);
                     }
                 }
             }
         });
         paintGraph(g);
+    }
+
+    private List<Edge> returnMinSpanningTreePrim() {
+        minSpanningTreePrim = new ArrayList<>();
+        List<Edge> availableEdges = new ArrayList<>(graph);
+        List<Edge> actualIncidentEdges = null;
+        List<Vertex> availableVertices = new ArrayList<>(vertices.values());
+        Edge curMinEdge;
+        availableEdges.sort(Edge::compareTo);
+        Set<Vertex> usedVertices = new HashSet<>();
+        Vertex a, b;
+
+        a = availableVertices.get(0);
+        usedVertices.add(a);
+        availableVertices.remove(a);
+        actualIncidentEdges = searchNotUsedIncidentEdgesForPrim(a, availableEdges, availableVertices);
+        curMinEdge = searchNotUsedIncidentEdgesForPrim(a, availableEdges, availableVertices).get(0);
+        while (availableVertices.size() > 0) {
+            //ищем минимум по всем ребрам которые вообще можно добавить к сущ. дереву
+            for (Vertex vertex : usedVertices) {
+                actualIncidentEdges = searchNotUsedIncidentEdgesForPrim(vertex, availableEdges, availableVertices);
+                if (actualIncidentEdges.size() > 0 && curMinEdge == null) {
+                    curMinEdge = actualIncidentEdges.get(0);
+                }
+                //для конкретной вершины нашли минимум
+                for (Edge edge : actualIncidentEdges) {
+                    if (curMinEdge.getC() > edge.getC()) {
+                        curMinEdge = edge;
+                    }
+                }
+            }
+            // теперь мы знаем минимальное ребро. добавим его
+            // добавится вершина в использованные, уйдет из доступных
+            // добавится ребро в ответ, уйдет из доступных
+            availableVertices.remove(curMinEdge.getA());
+            availableVertices.remove(curMinEdge.getB());
+            availableEdges.remove(curMinEdge);
+            usedVertices.add(curMinEdge.getA());
+            usedVertices.add(curMinEdge.getB()); //все равно добавится что-то одно, то чего не было
+            minSpanningTreePrim.add(curMinEdge); //вот так мы и добавляем ребра
+            curMinEdge = null;
+        }
+        minSpanningTreePrim.sort(Edge::compareTo);
+        return minSpanningTreePrim;
     }
 
     public boolean isGraphPainted() {
@@ -126,7 +184,7 @@ public class MainWindow extends JFrame {
     }
 
     public List<Edge> returnMinSpanningTreeCrascal() {
-        minSpanningTree = new ArrayList<>();
+        minSpanningTreeCrascal = new ArrayList<>();
         List<Edge> availableEdges = new ArrayList<>(graph);
         Edge edge;
         availableEdges.sort(Edge::compareTo);
@@ -137,13 +195,13 @@ public class MainWindow extends JFrame {
             edge = availableEdges.get(i);
             a = edge.getA();
             b = edge.getB();
-            if (!searchCircle(a, b, minSpanningTree, checkedVertices)) {
-                minSpanningTree.add(edge);
+            if (!searchCircle(a, b, minSpanningTreeCrascal, checkedVertices)) {
+                minSpanningTreeCrascal.add(edge);
             }
             checkedVertices.clear();
         }
-        minSpanningTree.sort(Edge::compareTo);
-        return minSpanningTree;
+        minSpanningTreeCrascal.sort(Edge::compareTo);
+        return minSpanningTreeCrascal;
     }
 
     private boolean searchCircle(Vertex a, Vertex b, ArrayList<Edge> minSpanningTree, Set<Vertex> checkedVertices) {
@@ -177,25 +235,43 @@ public class MainWindow extends JFrame {
         return false;
     }
 
-    public void paintMinSpanningTree() {
-        if (isMinSpanningTreePainted) {
-            return;
+    public void paintMinSpanningTree(int offset, ArrayList<Edge> minSpanningTree, Color color) {
+        if (minSpanningTree == minSpanningTreePrim) {
+            if (isMinSpanningTreePaintedPrim) {
+                return;
+            }
+            isMinSpanningTreePaintedPrim = true;
+        }
+        if (minSpanningTree == minSpanningTreeCrascal) {
+            if (isMinSpanningTreePaintedCrascal) {
+                return;
+            }
+            isMinSpanningTreePaintedCrascal = true;
         }
         int x1, x2, y1, y2;
-        graphics2D.setColor(Color.RED);
-        graphics2D.setStroke(new BasicStroke(5));
+        graphics2D.setColor(color);
+        graphics2D.setStroke(new BasicStroke(2));
         graphics2D.setFont(new Font("TimesRoman", Font.PLAIN, 13));
         Edge edge;
         for (int i = 0; i < minSpanningTree.size(); i++) {
             edge = minSpanningTree.get(i);
-            x1 = edge.getA().getX();
-            y1 = edge.getA().getY();
-            x2 = edge.getB().getX();
-            y2 = edge.getB().getY();
+            x1 = edge.getA().getX() + offset;
+            y1 = edge.getA().getY() + offset;
+            x2 = edge.getB().getX() + offset;
+            y2 = edge.getB().getY() + offset;
             graphics2D.drawLine(x1, y1, x2, y2);
-            graphics2D.drawString("(" + (i+1) + ": " + edge.getC() + ")", (x1 + x2) / 2 + 15, (y1 + y2) / 2 - 20);
+            graphics2D.drawString("(" + (i + 1) + ": " + edge.getC() + ")", (x1 + x2) / 2 + 5 * offset, (y1 + y2) / 2 - 20);
         }
         graphics2D.setColor(Color.BLACK);
-        isMinSpanningTreePainted = true;
+    }
+
+    public List<Edge> searchNotUsedIncidentEdgesForPrim(Vertex a, List<Edge> availableEdges, List<Vertex> availableVertices) {
+        List<Edge> notUsedIncidentEdges = new ArrayList<>();
+        for (Edge edge : availableEdges) {
+            if ((edge.getA().equals(a) || edge.getB().equals(a)) &&( availableVertices.contains(edge.getA()) || availableVertices.contains(edge.getB()))) {
+                notUsedIncidentEdges.add(edge);
+            }
+        }
+        return notUsedIncidentEdges;
     }
 }
