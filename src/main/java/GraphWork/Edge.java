@@ -1,13 +1,16 @@
 package GraphWork;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 public class Edge {
     private Vertex a;
     private Vertex b;
-    private double c;
+    private int c;
 
-    public Edge(Vertex a, Vertex b, double c) {
+    public Edge(Vertex a, Vertex b, int c) {
         this.a = a;
         this.b = b;
         this.c = c;
@@ -21,28 +24,35 @@ public class Edge {
         return b;
     }
 
-    public double getC() {
+    public int getC() {
         return c;
     }
 
-    public void setC(double c) {
+    public Set<Vertex> getVertices() {
+        Set<Vertex> vertices = new HashSet<>();
+        vertices.add(a);
+        vertices.add(b);
+        return vertices;
+    }
+
+    public void setC(int c) {
         this.c = c;
     }
 
     @Override
-    public boolean equals(Object o) { // без учета С
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Edge edge = (Edge) o;
-        return a.equals(edge.a) && b.equals(edge.b);
+        return c == edge.c && a.equals(edge.a) && b.equals(edge.b);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(a, b);
+        return Objects.hash(a, b, c);
     }
 
     public int compareTo(Edge edge) {
-        return Double.compare(this.getC(), edge.getC());
+        return Integer.compare(this.getC(), edge.getC());
     }
 }
