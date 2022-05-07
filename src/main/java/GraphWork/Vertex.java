@@ -42,7 +42,7 @@ public class Vertex {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Vertex vertex = (Vertex) o;
-        return Double.compare(vertex.x, x) == 0 && Double.compare(vertex.y, y) == 0 && number == vertex.number;
+        return x == vertex.x && y == vertex.y && number == vertex.number;
     }
 
     @Override

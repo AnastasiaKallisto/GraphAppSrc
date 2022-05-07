@@ -8,6 +8,7 @@ import java.util.Set;
 public class GraphAlghoritms {
 
     public static ArrayList<Edge> returnMinSpanningTreePrim(Graph graph) {
+        long t = System.currentTimeMillis();
         ArrayList<Edge> minSpanningTreePrim = new ArrayList<>();
         List<Edge> availableEdges = new ArrayList<>(graph.getEdges());
         List<Edge> actualIncidentEdges = null;
@@ -32,7 +33,7 @@ public class GraphAlghoritms {
                 }
                 // нашли минимальное по весу ребро
                 for (Edge edge : actualIncidentEdges) {
-                    if (curMinEdge.getC() > edge.getC()) {
+                    if (curMinEdge.getWeight() > edge.getWeight()) {
                         curMinEdge = edge;
                     }
                 }
@@ -46,11 +47,13 @@ public class GraphAlghoritms {
             minSpanningTreePrim.add(curMinEdge);
             curMinEdge = null;
         }
+        System.out.println("Prim " + graph.getEdges().size() + ": " + (System.currentTimeMillis() - t) + " millis");
         return minSpanningTreePrim;
     }
 
 
     public static ArrayList<Edge> returnMinSpanningTreeCrascal(Graph graph) {
+        long t = System.currentTimeMillis();
         ArrayList<Edge> minSpanningTreeCrascal = new ArrayList<>();
         List<Edge> availableEdges = new ArrayList<>(graph.getEdges());
         Edge edge;
@@ -64,33 +67,34 @@ public class GraphAlghoritms {
             }
             checkedVertices.clear();
         }
+        System.out.println("Crascal " + graph.getEdges().size() + ": " + (System.currentTimeMillis() - t) + " millis");
         return minSpanningTreeCrascal;
     }
 
     private static boolean searchCircle(Vertex a, Vertex b, ArrayList<Edge> minSpanningTree, Set<Vertex> checkedVertices) {
-        //ищем цикл из a в b.
+        //ищем цепочку из a в b.
         // Для этого рекурсивно будем смотреть непроверенные вершины, не придем ли мы из них в вершину b
         // по уже существующим ребрам дерева
-        ArrayList<Edge> edgesFromA = new ArrayList<>();
         Set<Vertex> needToBeCheckedSet = new HashSet<>();
         // для каждого ребра из уже существующего дерева
         for (Edge edge : minSpanningTree) {
-            // если это ребро уже есть, то смысла смотреть дальше нет
-            if (edge.getVertices().contains(a) && edge.getVertices().contains(b)) {
-                return true;
-            }
+            // если нашли ребро, приходящее в b, то смысла смотреть дальше нет
             if (edge.getA().equals(a)) {
-                // если мы еще не проверили вершину edge.getB(), то надо проверить, не придем ли мы из нее в b
+                if (edge.getB().equals(b)) {
+                    return true;
+                }
                 if (!checkedVertices.contains(edge.getB())) {
                     needToBeCheckedSet.add(edge.getB());
                 }
             }
-            if (edge.getB().equals(a)) { // else?
-                if (!checkedVertices.contains(edge.getA())) {
-                    needToBeCheckedSet.add(edge.getA());
+            if (edge.getB().equals(a)) {
+                if (edge.getA().equals(b)) {
+                    return true;
+                }
+                if (!checkedVertices.contains(edge.getA())) { // мы вторую уже проверяли?
+                    needToBeCheckedSet.add(edge.getA()); // нет - надо проверить.
                 }
             }
-            edgesFromA.add(edge);
         }
         checkedVertices.add(a);// из нее точно не попадаем в b
         for (Vertex vertex : needToBeCheckedSet) {
@@ -104,7 +108,7 @@ public class GraphAlghoritms {
     public static List<Edge> searchNotUsedIncidentEdgesForPrim(Vertex a, List<Edge> availableEdges, List<Vertex> availableVertices) {
         List<Edge> notUsedIncidentEdges = new ArrayList<>();
         for (Edge edge : availableEdges) {
-            if ((edge.getA().equals(a) || edge.getB().equals(a)) && (availableVertices.contains(edge.getA()) || availableVertices.contains(edge.getB()))) {
+            if ((edge.getVertices().contains(a)) && (availableVertices.contains(edge.getA()) || availableVertices.contains(edge.getB()))) { // ???
                 notUsedIncidentEdges.add(edge);
             }
         }

@@ -1,42 +1,32 @@
 package GraphWork;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 public class Edge {
-    private Vertex a;
-    private Vertex b;
-    private int c;
+    private ArrayList<Vertex> vertices;
+    private int weight;
 
-    public Edge(Vertex a, Vertex b, int c) {
-        this.a = a;
-        this.b = b;
-        this.c = c;
-    }
-
-    public Vertex getA() {
-        return a;
-    }
-
-    public Vertex getB() {
-        return b;
-    }
-
-    public int getC() {
-        return c;
-    }
-
-    public Set<Vertex> getVertices() {
-        Set<Vertex> vertices = new HashSet<>();
+    public Edge(Vertex a, Vertex b, int weight) {
+        vertices = new ArrayList<>();
         vertices.add(a);
         vertices.add(b);
-        return vertices;
+        this.weight = weight;
     }
 
-    public void setC(int c) {
-        this.c = c;
+    public int getWeight() {
+        return weight;
+    }
+
+    public Vertex getA(){
+        return vertices.get(0);
+    }
+
+    public Vertex getB(){
+        return vertices.get(1);
+    }
+
+    public ArrayList<Vertex> getVertices() {
+        return vertices;
     }
 
     @Override
@@ -44,15 +34,15 @@ public class Edge {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Edge edge = (Edge) o;
-        return c == edge.c && a.equals(edge.a) && b.equals(edge.b);
+        return new HashSet<>(vertices).equals(new HashSet<>(edge.vertices));
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(a, b, c);
+        return Objects.hash(new HashSet<>(vertices));
     }
 
     public int compareTo(Edge edge) {
-        return Integer.compare(this.getC(), edge.getC());
+        return Integer.compare(this.getWeight(), edge.getWeight());
     }
 }

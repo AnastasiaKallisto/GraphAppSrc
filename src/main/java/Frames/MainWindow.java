@@ -39,7 +39,7 @@ public class MainWindow extends JFrame {
 
         enterQuantityFrame = new EnterQuantityFrame(this);
         buttonsPanel = new JPanel(new GridLayout(15, 1, 10, 10));
-        generateGraphButton = new JButton("Сгенерировать граф");
+        generateGraphButton = new JButton("Нарисовать граф");
         primButton = new JButton("Запустить алгоритм Прима");
         crascalButton = new JButton("Запустить алгоритм Краскала");
         clearButton = new JButton("Очистить");
@@ -126,7 +126,7 @@ public class MainWindow extends JFrame {
             x2 = edge.getB().getX();
             y2 = edge.getB().getY();
             graphics2D.drawLine(x1, y1, x2, y2);
-            g.drawString(String.valueOf(edge.getC()), (x1 + x2) / 2 - 10, (y1 + y2) / 2 - 10);
+            g.drawString(String.valueOf(edge.getWeight()), (x1 + x2) / 2 - 10, (y1 + y2) / 2 - 10);
         }
         g.setColor(Color.BLACK);
         isGraphPainted = true;
@@ -157,7 +157,7 @@ public class MainWindow extends JFrame {
             x2 = edge.getB().getX() + offset;
             y2 = edge.getB().getY() + offset;
             graphics2D.drawLine(x1, y1, x2, y2);
-            graphics2D.drawString("(" + (i + 1) + ": " + edge.getC() + ")", (x1 + x2) / 2 + 5 * offset, (y1 + y2) / 2 - 20);
+            graphics2D.drawString("(" + (i + 1) + ": " + edge.getWeight() + ")", (x1 + x2) / 2 + 5 * offset, (y1 + y2) / 2 - 20);
         }
         graphics2D.setColor(Color.BLACK);
     }
