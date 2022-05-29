@@ -17,6 +17,11 @@ public class IntervalCrascalAlghoritm extends IntervalGraphAlghoritm{
         return null;
     }
 
+    @Override
+    public ArrayList<IntervalEdge> returnOnlyNeсessaryEdges(IntervalGraph helpGraph, ArrayList<IntervalEdge> edges) {
+        return null;
+    }
+
     public static ArrayList<Edge> returnMinSpanningTreeCrascal(Graph graph) {
         long t = System.currentTimeMillis();
         ArrayList<Edge> minSpanningTreeCrascal = new ArrayList<>();

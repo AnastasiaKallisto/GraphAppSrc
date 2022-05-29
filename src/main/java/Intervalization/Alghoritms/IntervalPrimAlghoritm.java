@@ -16,6 +16,12 @@ public class IntervalPrimAlghoritm extends IntervalGraphAlghoritm{
     public ArrayList<IntervalEdge> getNextEdges(IntervalGraph graph, ArrayList<IntervalEdge> availableEdges) {
         return null;
     }
+
+    @Override
+    public ArrayList<IntervalEdge> returnOnlyNeсessaryEdges(IntervalGraph helpGraph, ArrayList<IntervalEdge> helpListOfAvailableEdges) {
+        return null;
+    }
+
     public static ArrayList<Edge> returnMinSpanningTreePrim(Graph graph) {
         long t = System.currentTimeMillis();
         ArrayList<Edge> minSpanningTreePrim = new ArrayList<>();

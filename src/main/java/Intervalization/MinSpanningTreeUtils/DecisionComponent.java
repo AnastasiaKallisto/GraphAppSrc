@@ -34,7 +34,7 @@ public class DecisionComponent {
             // это ребро больше не появится в списке доступных
             helpListOfAvailableEdges.remove(edge);
             // удаляем те ребра, что дадут цикл - они нам больше не понадобятся
-            helpListOfAvailableEdges = alghoritm.removeUnneсessaryEdges(helpGraph,helpListOfAvailableEdges);
+            helpListOfAvailableEdges = alghoritm.returnOnlyNeсessaryEdges(helpGraph,helpListOfAvailableEdges);
             // подрезаем ребра
             helpListOfAvailableEdges = IntervalGraphAlghoritm.cutEdges(edge, helpListOfAvailableEdges);
             // создаем новый компонент решения со своим новым начальным графом и множеством доступных ребер

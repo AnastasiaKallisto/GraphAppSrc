@@ -29,6 +29,12 @@ public class IntervalEdge  {
         return intervalWeight;
     }
 
+    public void setStart(int s){
+        if (s<intervalWeight.getEnd()){
+            intervalWeight = new Interval(s, intervalWeight.getEnd()); // не будет ли тут ошибки....?
+        }
+    }
+
     public Vertex getA(){
         return vertices.get(0);
     }
