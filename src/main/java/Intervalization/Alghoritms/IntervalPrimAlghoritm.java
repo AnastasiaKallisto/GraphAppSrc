@@ -19,7 +19,15 @@ public class IntervalPrimAlghoritm extends IntervalGraphAlghoritm{
 
     @Override
     public ArrayList<IntervalEdge> returnOnlyNeсessaryEdges(IntervalGraph helpGraph, ArrayList<IntervalEdge> helpListOfAvailableEdges) {
-        return null;
+        ArrayList<IntervalEdge> needToBeRemoved = new ArrayList<>();
+        for (IntervalEdge edge: helpListOfAvailableEdges){
+            if (helpGraph.getVertices().values().containsAll(edge.getVertices())){
+                needToBeRemoved.add(edge);
+            }
+        }
+        ArrayList<IntervalEdge> answer = new ArrayList<>(helpListOfAvailableEdges);
+        answer.removeAll(needToBeRemoved);
+        return answer;
     }
 
     public static ArrayList<Edge> returnMinSpanningTreePrim(Graph graph) {
