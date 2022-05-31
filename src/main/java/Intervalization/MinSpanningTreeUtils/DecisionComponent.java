@@ -5,6 +5,7 @@ import Intervalization.IntervalGraph;
 import Intervalization.Alghoritms.IntervalGraphAlghoritm;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class DecisionComponent {
     private double probability; // вероятность попасть в этот компонент дерева решений
@@ -15,26 +16,23 @@ public class DecisionComponent {
     public DecisionComponent(double probability,
                              IntervalGraphAlghoritm alghoritm,
                              IntervalGraph graph,
-                             ArrayList<IntervalEdge> availableEdges) {
+                             List<IntervalEdge> availableEdges) {
         this.nextComponents = new ArrayList<>();
         minSpanningTree = null;
         this.probability = probability;
         //где-то тут считается нормально вероятность
         // кстати, если она слишком маленькая, можно на этом закончить создание объекта
         IntervalGraph helpGraph;
-        ArrayList<IntervalEdge> helpListOfAvailableEdges;
+        List<IntervalEdge> helpListOfAvailableEdges;
 
         // Теперь получим множество следующих потенциальных ребер, множество Q
         for (IntervalEdge edge: alghoritm.getNextEdges(graph, availableEdges)) {
             helpGraph = new IntervalGraph(graph);
             helpListOfAvailableEdges = new ArrayList<>(availableEdges);
-
             // в граф добавили ребро
             helpGraph.addEdge(edge);
             // это ребро больше не появится в списке доступных
             helpListOfAvailableEdges.remove(edge);
-            // удаляем те ребра, что дадут цикл - они нам больше не понадобятся
-            helpListOfAvailableEdges = alghoritm.returnOnlyNeсessaryEdges(helpGraph,helpListOfAvailableEdges);
             // подрезаем ребра
             helpListOfAvailableEdges = IntervalGraphAlghoritm.cutEdges(edge, helpListOfAvailableEdges);
             // создаем новый компонент решения со своим новым начальным графом и множеством доступных ребер

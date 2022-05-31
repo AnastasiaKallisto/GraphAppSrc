@@ -1,83 +1,48 @@
 package Intervalization.Alghoritms;
 
-import GraphWork.Edge;
-import GraphWork.Graph;
-import GraphWork.Vertex;
 import Intervalization.IntervalEdge;
 import Intervalization.IntervalGraph;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 public class IntervalPrimAlghoritm extends IntervalGraphAlghoritm{
-    @Override
-    public ArrayList<IntervalEdge> getNextEdges(IntervalGraph graph, ArrayList<IntervalEdge> availableEdges) {
-        return null;
+    @Override //формируется множество Q
+    public List<IntervalEdge> getNextEdges(IntervalGraph graph, List<IntervalEdge> incidentEdges) {
+        incidentEdges = returnEdgesWithoutCycle(graph, incidentEdges);
+        // нашли ребро с мин. правой границей
+        incidentEdges.sort(IntervalEdge::compareToRight);
+        int minRightBorder = incidentEdges.get(0).getIntervalWeight().getEnd();
+        // найдем инцид. ребра, для к-х есть веса меньше, чем minRightBorder
+        List<IntervalEdge> answer = new ArrayList<>();
+        for (IntervalEdge edge: incidentEdges) {
+            if (edge.getIntervalWeight().getStart() <= minRightBorder){
+                answer.add(edge);
+            }
+        }
+        return answer;
     }
 
-    @Override
-    public ArrayList<IntervalEdge> returnOnlyNeсessaryEdges(IntervalGraph helpGraph, ArrayList<IntervalEdge> helpListOfAvailableEdges) {
-        ArrayList<IntervalEdge> needToBeRemoved = new ArrayList<>();
-        for (IntervalEdge edge: helpListOfAvailableEdges){
-            if (helpGraph.getVertices().values().containsAll(edge.getVertices())){
+     //убираются ребра, которые могли бы дать цикл
+    public List<IntervalEdge> returnEdgesWithoutCycle(IntervalGraph graph, List<IntervalEdge> edges) {
+        List<IntervalEdge> needToBeRemoved = new ArrayList<>();
+        for (IntervalEdge edge: edges){
+            // если обе вершины ребра уже содержатся во множестве задействованных вершин, значит, оно даст цикл
+            if (graph.getVertices().values().containsAll(edge.getVertices())){
                 needToBeRemoved.add(edge);
             }
         }
-        ArrayList<IntervalEdge> answer = new ArrayList<>(helpListOfAvailableEdges);
+        List<IntervalEdge> answer = new ArrayList<>(edges);
         answer.removeAll(needToBeRemoved);
         return answer;
     }
 
-    public static ArrayList<Edge> returnMinSpanningTreePrim(Graph graph) {
-        long t = System.currentTimeMillis();
-        ArrayList<Edge> minSpanningTreePrim = new ArrayList<>();
-        List<Edge> availableEdges = new ArrayList<>(graph.getEdges());
-        List<Edge> actualIncidentEdges = null;
-        List<Vertex> availableVertices = new ArrayList<>(graph.getVertices().values());
-        Edge curMinEdge;
-        availableEdges.sort(Edge::compareTo);
-        Set<Vertex> usedVertices = new HashSet<>();
-        Vertex a;
-
-        a = availableVertices.get(0);
-        usedVertices.add(a);
-        availableVertices.remove(a);
-        curMinEdge = searchNotUsedIncidentEdgesForPrim(a, availableEdges, availableVertices).get(0);
-        //пока возможно
-        while (availableVertices.size() > 0) {
-            //ищем минимум по всем ребрам которые вообще можно добавить к сущ. дереву
-            for (Vertex vertex : usedVertices) {
-                // для конкретной вершины посмотрели все незадействованные ребра, выбрали из них одно
-                actualIncidentEdges = searchNotUsedIncidentEdgesForPrim(vertex, availableEdges, availableVertices);
-                if (actualIncidentEdges.size() > 0 && curMinEdge == null) {
-                    curMinEdge = actualIncidentEdges.get(0);
-                }
-                // нашли минимальное по весу ребро
-                for (Edge edge : actualIncidentEdges) {
-                    if (curMinEdge.getWeight() > edge.getWeight()) {
-                        curMinEdge = edge;
-                    }
-                }
-            }
-            // теперь мы знаем минимальное ребро. добавим его
-            // из него добавится вершина в использованные, уйдет из доступных
-            // добавится ребро в мин.ост.дерево, уйдет из доступных
-            availableVertices.removeAll(curMinEdge.getVertices());
-            availableEdges.remove(curMinEdge);
-            usedVertices.addAll(curMinEdge.getVertices());
-            minSpanningTreePrim.add(curMinEdge);
-            curMinEdge = null;
-        }
-        System.out.println("Prim " + graph.getEdges().size() + ": " + (System.currentTimeMillis() - t) + " millis");
-        return minSpanningTreePrim;
-    }
-
-    public static List<Edge> searchNotUsedIncidentEdgesForPrim(Vertex a, List<Edge> availableEdges, List<Vertex> availableVertices) {
-        List<Edge> notUsedIncidentEdges = new ArrayList<>();
-        for (Edge edge : availableEdges) {
-            if ((edge.getVertices().contains(a)) && (availableVertices.contains(edge.getA()) || availableVertices.contains(edge.getB()))) { // ???
+    public static List<IntervalEdge> searchIncidentEdgesForPrim(IntervalGraph graph, List<IntervalEdge> edges) {
+       List<IntervalEdge> notUsedIncidentEdges = new ArrayList<>();
+       Set<Integer> vertexNumbers = graph.getVertices().keySet();
+        for (IntervalEdge edge : edges) {
+            if (vertexNumbers.contains(edge.getA().getNumber()) || vertexNumbers.contains(edge.getB().getNumber())){
                 notUsedIncidentEdges.add(edge);
             }
         }

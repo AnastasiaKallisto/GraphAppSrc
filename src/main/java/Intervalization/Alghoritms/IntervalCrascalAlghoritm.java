@@ -13,41 +13,52 @@ import java.util.Set;
 
 public class IntervalCrascalAlghoritm extends IntervalGraphAlghoritm{
     @Override
-    public ArrayList<IntervalEdge> getNextEdges(IntervalGraph graph, ArrayList<IntervalEdge> availableEdges) {
-        return null;
-    }
-
-    @Override
-    public ArrayList<IntervalEdge> returnOnlyNeсessaryEdges(IntervalGraph helpGraph, ArrayList<IntervalEdge> edges) {
-        return null;
-    }
-
-    public static ArrayList<Edge> returnMinSpanningTreeCrascal(Graph graph) {
-        long t = System.currentTimeMillis();
-        ArrayList<Edge> minSpanningTreeCrascal = new ArrayList<>();
-        List<Edge> availableEdges = new ArrayList<>(graph.getEdges());
-        Edge edge;
-        availableEdges.sort(Edge::compareTo);
-        Set<Vertex> checkedVertices = new HashSet<>();
-
-        for (int i = 0; i < availableEdges.size(); i++) {
-            edge = availableEdges.get(i);
-            if (!searchCircle(edge.getA(), edge.getB(), minSpanningTreeCrascal, checkedVertices)) {
-                minSpanningTreeCrascal.add(edge);
+    public List<IntervalEdge> getNextEdges(IntervalGraph graph, List<IntervalEdge> availableEdges) {
+        List<IntervalEdge> needToBeRemoved = new ArrayList<>();
+        List<IntervalEdge> answer = new ArrayList<>();
+        availableEdges.sort(IntervalEdge::compareToRight);
+        int minRightBorder = 0;
+        // находим ребро с минимальной правой границей
+        // идем по порядку. Если встречаем ребро, которое дает цикл,
+        // вносим его в список тех, что нужно убрать
+        // Если ребро не дает цикл - оно то, что нам нужно.
+        for (IntervalEdge edge: availableEdges){
+            if (!searchCircle(edge.getA(),edge.getB(), graph, new HashSet<>())){
+                answer.add(edge);
+                needToBeRemoved.add(edge);
+                minRightBorder = edge.getIntervalWeight().getEnd();
+                break;
+            } else {
+                needToBeRemoved.add(edge);
             }
-            checkedVertices.clear();
         }
-        System.out.println("Crascal " + graph.getEdges().size() + ": " + (System.currentTimeMillis() - t) + " millis");
-        return minSpanningTreeCrascal;
+        availableEdges.removeAll(needToBeRemoved);
+        // Найдем ВСЕ ребра с весами меньше, чем minRightBorder, попутно убирая те, что дают цикл.
+        // Получим множество Q
+        availableEdges.sort(IntervalEdge::compareToLeft);
+        for (IntervalEdge edge: availableEdges){
+            //если левый вес тот что надо
+            if (edge.getIntervalWeight().getStart() <= minRightBorder){
+                // если нет цикла
+                if (!searchCircle(edge.getA(),edge.getB(), graph, new HashSet<>())){
+                    answer.add(edge);
+                } else {
+                    needToBeRemoved.add(edge);
+                }
+            } else {
+                break;
+            }
+        }
+        return answer;
     }
 
-    private static boolean searchCircle(Vertex a, Vertex b, ArrayList<Edge> minSpanningTree, Set<Vertex> checkedVertices) {
+    private static boolean searchCircle(Vertex a, Vertex b, IntervalGraph graph, Set<Vertex> checkedVertices) {
         //ищем цепочку из a в b.
         // Для этого рекурсивно будем смотреть непроверенные вершины, не придем ли мы из них в вершину b
         // по уже существующим ребрам дерева
         Set<Vertex> needToBeCheckedSet = new HashSet<>();
         // для каждого ребра из уже существующего дерева
-        for (Edge edge : minSpanningTree) {
+        for (IntervalEdge edge : graph.getEdges()) {
             // если нашли ребро, приходящее в b, то смысла смотреть дальше нет
             if (edge.getA().equals(a)) {
                 if (edge.getB().equals(b)) {
@@ -68,7 +79,7 @@ public class IntervalCrascalAlghoritm extends IntervalGraphAlghoritm{
         }
         checkedVertices.add(a);// из нее точно не попадаем в b
         for (Vertex vertex : needToBeCheckedSet) {
-            if (searchCircle(vertex, b, minSpanningTree, checkedVertices)) {
+            if (searchCircle(vertex, b, graph, checkedVertices)) {
                 return true;
             }
         }

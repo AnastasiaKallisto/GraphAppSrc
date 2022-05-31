@@ -1,7 +1,6 @@
 package Intervalization;
 
 import GraphWork.Vertex;
-import Intervalization.MinSpanningTreeUtils.DecisionComponent;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -60,7 +59,11 @@ public class IntervalEdge  {
         return Objects.hash(new HashSet<>(vertices));
     }
 
-    public int compareTo(IntervalEdge edge) {
+    public int compareToRight(IntervalEdge edge) {
         return Integer.compare(this.getIntervalWeight().getEnd(), edge.getIntervalWeight().getEnd());
+    }
+
+    public int compareToLeft(IntervalEdge edge) {
+        return Integer.compare(this.getIntervalWeight().getStart(), edge.getIntervalWeight().getStart());
     }
 }
