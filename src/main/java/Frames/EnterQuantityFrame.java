@@ -14,9 +14,9 @@ public class EnterQuantityFrame extends JFrame
     private JPanel enterQuantityPanel;
     private JTextField quantityTextField;
     private Integer quantity;
-    private MainWindow frame;
+    private JFrame frame;
 
-    public EnterQuantityFrame(MainWindow frame) {
+    public EnterQuantityFrame(JFrame frame) {
         super("Введите количество вершин графа");
         this.frame = frame;
         quantityTextField = new JTextField(15);
@@ -57,10 +57,7 @@ public class EnterQuantityFrame extends JFrame
             }
             quantityTextField.setText("");
             dispose();
-            if (!frame.isGraphPainted()) {
-                frame.repaint();
-                //frame.setGraphPainted(true);
-            }
+            frame.repaint();
         } catch (NumberFormatException exception){
 
         }
