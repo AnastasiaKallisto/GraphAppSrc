@@ -1,7 +1,5 @@
 package Intervalization.Alghoritms;
 
-import GraphWork.Edge;
-import GraphWork.Graph;
 import GraphWork.Vertex;
 import Intervalization.IntervalEdge;
 import Intervalization.IntervalGraph;

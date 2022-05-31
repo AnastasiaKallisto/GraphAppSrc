@@ -52,7 +52,7 @@ public class GraphAlghoritms {
     }
 
 
-    public static ArrayList<Edge> returnMinSpanningTreeCrascal(Graph graph) {
+    public static ArrayList<Edge> returnMinSpanningTreeKruskal(Graph graph) {
         long t = System.currentTimeMillis();
         ArrayList<Edge> minSpanningTreeCrascal = new ArrayList<>();
         List<Edge> availableEdges = new ArrayList<>(graph.getEdges());

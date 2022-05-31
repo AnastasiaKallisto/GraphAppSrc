@@ -26,6 +26,7 @@ public class DecisionComponent {
         List<IntervalEdge> helpListOfAvailableEdges;
 
         // Теперь получим множество следующих потенциальных ребер, множество Q
+        // и поработаем с ним - посмотрим, что там будет дальше
         for (IntervalEdge edge: alghoritm.getNextEdges(graph, availableEdges)) {
             helpGraph = new IntervalGraph(graph);
             helpListOfAvailableEdges = new ArrayList<>(availableEdges);
@@ -35,7 +36,7 @@ public class DecisionComponent {
             helpListOfAvailableEdges.remove(edge);
             // подрезаем ребра
             helpListOfAvailableEdges = IntervalGraphAlghoritm.cutEdges(edge, helpListOfAvailableEdges);
-            // создаем новый компонент решения со своим новым начальным графом и множеством доступных ребер
+            // создаем новый компонент решения со своим новым начальным графом и новым множеством доступных ребер
             nextComponents.add(new DecisionComponent(probability, alghoritm, helpGraph, helpListOfAvailableEdges));
         }
         // т.е. мы один раз вызвали конструктор и задали сразу все дерево решений

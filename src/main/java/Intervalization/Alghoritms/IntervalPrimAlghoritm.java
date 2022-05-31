@@ -8,10 +8,18 @@ import java.util.List;
 import java.util.Set;
 
 public class IntervalPrimAlghoritm extends IntervalGraphAlghoritm{
-    @Override //формируется множество Q
-    public List<IntervalEdge> getNextEdges(IntervalGraph graph, List<IntervalEdge> incidentEdges) {
-        incidentEdges = returnEdgesWithoutCycle(graph, incidentEdges);
-        // нашли ребро с мин. правой границей
+    @Override
+    public List<IntervalEdge> getNextEdges(IntervalGraph graph, List<IntervalEdge> availableEdges) {
+        List<IntervalEdge> needToBeRemoved = new ArrayList<>();
+        List<IntervalEdge> incidentEdges = searchIncidentEdgesForPrim(graph, availableEdges);
+        for (IntervalEdge edge: incidentEdges){
+            // если обе вершины ребра уже содержатся во множестве задействованных вершин, значит, оно даст цикл
+            if (graph.getVertices().values().containsAll(edge.getVertices())){
+                needToBeRemoved.add(edge);
+            }
+        }
+        incidentEdges.removeAll(needToBeRemoved);
+        availableEdges.removeAll(needToBeRemoved);
         incidentEdges.sort(IntervalEdge::compareToRight);
         int minRightBorder = incidentEdges.get(0).getIntervalWeight().getEnd();
         // найдем инцид. ребра, для к-х есть веса меньше, чем minRightBorder
@@ -24,28 +32,20 @@ public class IntervalPrimAlghoritm extends IntervalGraphAlghoritm{
         return answer;
     }
 
-     //убираются ребра, которые могли бы дать цикл
-    public List<IntervalEdge> returnEdgesWithoutCycle(IntervalGraph graph, List<IntervalEdge> edges) {
-        List<IntervalEdge> needToBeRemoved = new ArrayList<>();
-        for (IntervalEdge edge: edges){
-            // если обе вершины ребра уже содержатся во множестве задействованных вершин, значит, оно даст цикл
-            if (graph.getVertices().values().containsAll(edge.getVertices())){
-                needToBeRemoved.add(edge);
-            }
-        }
-        List<IntervalEdge> answer = new ArrayList<>(edges);
-        answer.removeAll(needToBeRemoved);
-        return answer;
-    }
-
-    public static List<IntervalEdge> searchIncidentEdgesForPrim(IntervalGraph graph, List<IntervalEdge> edges) {
-       List<IntervalEdge> notUsedIncidentEdges = new ArrayList<>();
+    /**
+     *
+     * @param graph - уже вычисленная часть дерева
+     * @param availableEdges - все доступные для добавления ребра
+     * @return - список ребер, инцидентных с вершинами, содержащимися в graph
+     */
+    public static List<IntervalEdge> searchIncidentEdgesForPrim(IntervalGraph graph, List<IntervalEdge> availableEdges) {
+       List<IntervalEdge> incidentEdges = new ArrayList<>();
        Set<Integer> vertexNumbers = graph.getVertices().keySet();
-        for (IntervalEdge edge : edges) {
+        for (IntervalEdge edge : availableEdges) {
             if (vertexNumbers.contains(edge.getA().getNumber()) || vertexNumbers.contains(edge.getB().getNumber())){
-                notUsedIncidentEdges.add(edge);
+                incidentEdges.add(edge);
             }
         }
-        return notUsedIncidentEdges;
+        return incidentEdges;
     }
 }

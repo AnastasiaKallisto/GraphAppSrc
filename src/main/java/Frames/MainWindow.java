@@ -1,31 +1,50 @@
 package Frames;
 
 import GraphWork.*;
+import Intervalization.IntervalGraph;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.*;
 
 public class MainWindow extends JFrame {
     private static final int sizeX = Toolkit.getDefaultToolkit().getScreenSize().width;
     private static final int sizeY = Toolkit.getDefaultToolkit().getScreenSize().height;
-    private EnterQuantityFrame enterQuantityFrame;
-    private JButton generateGraphButton;
-    private JButton primButton;
-    private JButton crascalButton;
-    private JButton clearButton;
-    private JPanel buttonsPanel;
+
+    private EnterQuantityFrame enterQuantityFrame1;
+    private JButton generateGraphButton1;
+    private JButton primButton1;
+    private JButton kruskalButton1;
+    private JButton clearButton1;
+    private JPanel buttonsPanel1;
+    private JPanel tabsPanel1;
+
+    private EnterQuantityFrame enterQuantityFrame2;
+    private JButton generateGraphButton2;
+    private JButton primButton2;
+    private JButton kruskalButton2;
+    private JButton clearButton2;
+    private JPanel buttonsPanel2;
+    private JPanel tabsPanel2;
+
+    private JTabbedPane tabbedPane;
     private Graphics2D graphics2D;
 
-    private static Integer quantityOfVertices;
-    private Graph graph;
-    private ArrayList<Edge> minSpanningTreeCrascal;
-    private ArrayList<Edge> minSpanningTreePrim;
-    private boolean isGraphPainted;
-    private boolean isMinSpanningTreePaintedCrascal;
-    private boolean isMinSpanningTreePaintedPrim;
+    private static Integer quantityOfVerticesForExactGraph;
+    private Graph exactGraph;
+    private ArrayList<Edge> exactMinSpanningTreeKruskal;
+    private ArrayList<Edge> exactMinSpanningTreePrim;
+    private boolean isExactGraphPainted;
+    private boolean isExactMinSpanningTreePaintedKruskal;
+    private boolean isExactMinSpanningTreePaintedPrim;
+
+    private static Integer quantityOfVerticesForIntervalGraph;
+    private IntervalGraph intervalGraph;
+    private ArrayList<Edge> intervalMinSpanningTreeKruskal;
+    private ArrayList<Edge> intervalMinSpanningTreePrim;
+    private boolean isIntervalGraphPainted;
+    private boolean isIntervalMinSpanningTreePaintedKruskal;
+    private boolean isIntervalMinSpanningTreePaintedPrim;
 
     public static void main(String[] args) {
         JFrame window = new MainWindow(); //при создании элемента метод paint вызывается автоматически
@@ -34,67 +53,76 @@ public class MainWindow extends JFrame {
     MainWindow() {
         super("Graph Alghoritms");
         setSize(sizeX, sizeY);
-        quantityOfVertices = null;
-        isGraphPainted = false;
+        quantityOfVerticesForExactGraph = null;
+        isExactGraphPainted = false;
 
-        enterQuantityFrame = new EnterQuantityFrame(this);
-        buttonsPanel = new JPanel(new GridLayout(15, 1, 10, 10));
-        generateGraphButton = new JButton("Нарисовать граф");
-        primButton = new JButton("Запустить алгоритм Прима");
-        crascalButton = new JButton("Запустить алгоритм Краскала");
-        clearButton = new JButton("Очистить");
-        buttonsPanel.add(generateGraphButton);
-        buttonsPanel.add(primButton);
-        buttonsPanel.add(crascalButton);
-        buttonsPanel.add(clearButton);
-        this.getContentPane().add(buttonsPanel, BorderLayout.WEST);
-        graph = null;
-        minSpanningTreeCrascal = null;
-        minSpanningTreePrim = null;
+        enterQuantityFrame1 = new EnterQuantityFrame(this);
+        enterQuantityFrame2 = new EnterQuantityFrame(this);
+        tabsPanel1 = new JPanel();
+        tabsPanel2 = new JPanel();
+        tabbedPane = new JTabbedPane();
+
+        buttonsPanel1 = new JPanel(new GridLayout(15, 1, 10, 10));
+        generateGraphButton1 = new JButton("Нарисовать граф");
+        primButton1 = new JButton("Запустить алгоритм Прима");
+        kruskalButton1 = new JButton("Запустить алгоритм Краскала");
+        clearButton1 = new JButton("Очистить");
+        buttonsPanel1.add(generateGraphButton1);
+        buttonsPanel1.add(primButton1);
+        buttonsPanel1.add(kruskalButton1);
+        buttonsPanel1.add(clearButton1);
+        tabsPanel1.add(buttonsPanel1, BorderLayout.WEST);
+
+        buttonsPanel2 = new JPanel(new GridLayout(15, 1, 10, 10));
+        generateGraphButton2 = new JButton("Нарисовать граф");
+        primButton2 = new JButton("Запустить алгоритм Прима");
+        kruskalButton2 = new JButton("Запустить алгоритмgfhfgj Краскала");
+        clearButton2 = new JButton("Очистить");
+        buttonsPanel2.add(generateGraphButton2);
+        buttonsPanel2.add(primButton2);
+        buttonsPanel2.add(kruskalButton2);
+        buttonsPanel2.add(clearButton2);
+        tabsPanel2.add(buttonsPanel2, BorderLayout.WEST);
+
+        tabbedPane.addTab("Точные веса " , tabsPanel1);
+        tabbedPane.addTab("Интервальные веса " , tabsPanel2);
+        this.getContentPane().add(tabbedPane, BorderLayout.NORTH);
+        //this.getContentPane().add(buttonsPanel, BorderLayout.WEST);
+        exactGraph = null;
+        exactMinSpanningTreeKruskal = null;
+        exactMinSpanningTreePrim = null;
         setVisible(true);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
     }
 
     public void paint(Graphics g) {
         super.paint(g);
-        isMinSpanningTreePaintedCrascal = false;
-        isMinSpanningTreePaintedPrim = false;
+        isExactMinSpanningTreePaintedKruskal = false;
+        isExactMinSpanningTreePaintedPrim = false;
         graphics2D = (Graphics2D) getGraphics();
-        generateGraphButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (!isGraphPainted) {
-                    enterQuantityFrame.setVisible(true);
+        generateGraphButton1.addActionListener(e -> {
+            if (!isExactGraphPainted) {
+                enterQuantityFrame1.setVisible(true);
+            }
+        });
+        clearButton1.addActionListener(e -> {
+            repaint();
+            isExactGraphPainted = false;
+            enterQuantityFrame1.setQuantityNull(); // костыль
+        });
+        kruskalButton1.addActionListener(e -> {
+            if (isExactGraphPainted) {
+                if (!isExactMinSpanningTreePaintedKruskal) {
+                    exactMinSpanningTreeKruskal = GraphAlghoritms.returnMinSpanningTreeKruskal(exactGraph);
+                    paintMinSpanningTree(5, exactMinSpanningTreeKruskal, Color.RED);
                 }
             }
         });
-        clearButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                repaint();
-                isGraphPainted = false;
-                enterQuantityFrame.setQuantityNull(); // костыль
-            }
-        });
-        crascalButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (isGraphPainted) {
-                    if (!isMinSpanningTreePaintedCrascal) {
-                        minSpanningTreeCrascal = GraphAlghoritms.returnMinSpanningTreeCrascal(graph);
-                        paintMinSpanningTree(5, minSpanningTreeCrascal, Color.RED);
-                    }
-                }
-            }
-        });
-        primButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (isGraphPainted) {
-                    if (!isMinSpanningTreePaintedPrim) {
-                        minSpanningTreePrim = GraphAlghoritms.returnMinSpanningTreePrim(graph);
-                        paintMinSpanningTree(-5, minSpanningTreePrim, Color.BLUE);
-                    }
+        primButton1.addActionListener(e -> {
+            if (isExactGraphPainted) {
+                if (!isExactMinSpanningTreePaintedPrim) {
+                    exactMinSpanningTreePrim = GraphAlghoritms.returnMinSpanningTreePrim(exactGraph);
+                    paintMinSpanningTree(-5, exactMinSpanningTreePrim, Color.BLUE);
                 }
             }
         });
@@ -102,25 +130,25 @@ public class MainWindow extends JFrame {
     }
 
     public boolean isGraphPainted() {
-        return isGraphPainted;
+        return isExactGraphPainted;
     }
 
     public void paintGraph(Graphics g) {
-        if (isGraphPainted) {
+        if (isExactGraphPainted) {
             return;
         }
-        quantityOfVertices = enterQuantityFrame.getQuantity();
-        if (quantityOfVertices == null) {
+        quantityOfVerticesForExactGraph = enterQuantityFrame1.getQuantity();
+        if (quantityOfVerticesForExactGraph == null) {
             return;
         }
-        graph = new Graph(quantityOfVertices, sizeX, sizeY);
-        for (Vertex vertex : graph.getVertices().values()) {
+        exactGraph = new Graph(quantityOfVerticesForExactGraph, sizeX, sizeY);
+        for (Vertex vertex : exactGraph.getVertices().values()) {
             g.fillOval(vertex.getX(), vertex.getY(), 5, 5);
             g.drawString(vertex.toString(), vertex.getX(), vertex.getY() + 20);
         }
         int x1, y1, x2, y2;
         g.setColor(Color.gray);
-        for (Edge edge : graph.getEdges()) {
+        for (Edge edge : exactGraph.getEdges()) {
             x1 = edge.getA().getX();
             y1 = edge.getA().getY();
             x2 = edge.getB().getX();
@@ -129,21 +157,21 @@ public class MainWindow extends JFrame {
             g.drawString(String.valueOf(edge.getWeight()), (x1 + x2) / 2 - 10, (y1 + y2) / 2 - 10);
         }
         g.setColor(Color.BLACK);
-        isGraphPainted = true;
+        isExactGraphPainted = true;
     }
 
     public void paintMinSpanningTree(int offset, ArrayList<Edge> minSpanningTree, Color color) {
-        if (minSpanningTree == minSpanningTreePrim) {
-            if (isMinSpanningTreePaintedPrim) {
+        if (minSpanningTree == exactMinSpanningTreePrim) {
+            if (isExactMinSpanningTreePaintedPrim) {
                 return;
             }
-            isMinSpanningTreePaintedPrim = true;
+            isExactMinSpanningTreePaintedPrim = true;
         }
-        if (minSpanningTree == minSpanningTreeCrascal) {
-            if (isMinSpanningTreePaintedCrascal) {
+        if (minSpanningTree == exactMinSpanningTreeKruskal) {
+            if (isExactMinSpanningTreePaintedKruskal) {
                 return;
             }
-            isMinSpanningTreePaintedCrascal = true;
+            isExactMinSpanningTreePaintedKruskal = true;
         }
         int x1, x2, y1, y2;
         graphics2D.setColor(color);
