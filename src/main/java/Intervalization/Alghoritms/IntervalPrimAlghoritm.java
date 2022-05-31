@@ -10,6 +10,7 @@ import java.util.Set;
 public class IntervalPrimAlghoritm extends IntervalGraphAlghoritm{
     @Override
     public List<IntervalEdge> getNextEdges(IntervalGraph graph, List<IntervalEdge> availableEdges) {
+
         List<IntervalEdge> needToBeRemoved = new ArrayList<>();
         List<IntervalEdge> incidentEdges = searchIncidentEdgesForPrim(graph, availableEdges);
         for (IntervalEdge edge: incidentEdges){
@@ -20,6 +21,9 @@ public class IntervalPrimAlghoritm extends IntervalGraphAlghoritm{
         }
         incidentEdges.removeAll(needToBeRemoved);
         availableEdges.removeAll(needToBeRemoved);
+        if (availableEdges.size() == 0 || incidentEdges.size() == 0){
+            return new ArrayList<>();
+        }
         incidentEdges.sort(IntervalEdge::compareToRight);
         int minRightBorder = incidentEdges.get(0).getIntervalWeight().getEnd();
         // найдем инцид. ребра, для к-х есть веса меньше, чем minRightBorder

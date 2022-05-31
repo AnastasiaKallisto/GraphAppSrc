@@ -1,12 +1,18 @@
 package Frames;
 
 import GraphWork.*;
+import Intervalization.Alghoritms.IntervalCrascalAlghoritm;
+import Intervalization.Alghoritms.IntervalPrimAlghoritm;
+import Intervalization.IntervalEdge;
+import Intervalization.IntervalGraph;
+import Intervalization.MinSpanningTreeUtils.DecisionComponent;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.*;
+import java.util.List;
 
 public class WindowForIntervalGraph extends JFrame {
     private static final int sizeX = Toolkit.getDefaultToolkit().getScreenSize().width;
@@ -14,7 +20,7 @@ public class WindowForIntervalGraph extends JFrame {
     private EnterQuantityFrame enterQuantityFrame;
     private JButton generateGraphButton;
     private JButton primButton;
-    private JButton crascalButton;
+    private JButton kruskalButton;
     private JButton clearButton;
     private JPanel buttonsPanel;
 
@@ -22,58 +28,46 @@ public class WindowForIntervalGraph extends JFrame {
     private Graphics2D graphics2D;
 
     private static Integer quantityOfVertices;
-    private Graph graph;
-    private ArrayList<Edge> minSpanningTreeCrascal;
-    private ArrayList<Edge> minSpanningTreePrim;
+    private IntervalGraph graph;
+    private List<IntervalGraph> minSpanningTreesKruskal;
+    private List<IntervalGraph> minSpanningTreesPrim;
     private boolean isGraphPainted;
-    private boolean isMinSpanningTreePaintedCrascal;
+    private boolean isMinSpanningTreePaintedKruskal;
     private boolean isMinSpanningTreePaintedPrim;
 
-    private MainWindow mainWindow;
-    private JPanel tabs;
-    private JButton exactGraphButton;
-    private JButton intervalGraphButton;
-/*
-    public static void main(String[] args) {
-        JFrame window = new WindowForExactGraph(); //при создании элемента метод paint вызывается автоматически
-    }*/
 
-    WindowForIntervalGraph(MainWindow mainWindow) {
+    public static void main(String[] args) {
+        JFrame window = new WindowForIntervalGraph(); //при создании элемента метод paint вызывается автоматически
+    }
+
+    WindowForIntervalGraph() {
         super("Graph Alghoritms");
-        this.mainWindow = mainWindow;
         setSize(sizeX, sizeY);
         quantityOfVertices = null;
         isGraphPainted = false;
 
-        tabs = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        exactGraphButton = new JButton("Точные веса");
-        intervalGraphButton = new JButton("Интервальные веса");
-        tabs.add(exactGraphButton);
-        tabs.add(intervalGraphButton);
-
         enterQuantityFrame = new EnterQuantityFrame(this);
         buttonsPanel = new JPanel(new GridLayout(15, 1, 10, 10));
-        generateGraphButton = new JButton("Нарисовать fghhjfdhfgjграф");
+        generateGraphButton = new JButton("Нарисовать граф");
         primButton = new JButton("Запустить алгоритм Прима");
-        crascalButton = new JButton("Запустить алгоритм Краскала");
+        kruskalButton = new JButton("Запустить алгоритм Краскала");
         clearButton = new JButton("Очистить");
         buttonsPanel.add(generateGraphButton);
         buttonsPanel.add(primButton);
-        buttonsPanel.add(crascalButton);
+        buttonsPanel.add(kruskalButton);
         buttonsPanel.add(clearButton);
 
-        this.getContentPane().add(tabs, BorderLayout.NORTH);
         this.getContentPane().add(buttonsPanel, BorderLayout.WEST);
         graph = null;
-        minSpanningTreeCrascal = null;
-        minSpanningTreePrim = null;
+        minSpanningTreesKruskal = null;
+        minSpanningTreesPrim = null;
         setVisible(true);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
     }
 
     public void paint(Graphics g) {
         super.paint(g);
-        isMinSpanningTreePaintedCrascal = false;
+        isMinSpanningTreePaintedKruskal = false;
         isMinSpanningTreePaintedPrim = false;
         graphics2D = (Graphics2D) getGraphics();
         generateGraphButton.addActionListener(new ActionListener() {
@@ -93,13 +87,14 @@ public class WindowForIntervalGraph extends JFrame {
                 enterQuantityFrame.setQuantityNull(); // костыль
             }
         });
-        crascalButton.addActionListener(new ActionListener() {
+        kruskalButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (isGraphPainted) {
-                    if (!isMinSpanningTreePaintedCrascal) {
-                        minSpanningTreeCrascal = GraphAlghoritms.returnMinSpanningTreeKruskal(graph);
-                        paintMinSpanningTree(5, minSpanningTreeCrascal, Color.RED);
+                    if (!isMinSpanningTreePaintedKruskal) {
+                        DecisionComponent component = new DecisionComponent(1, new IntervalCrascalAlghoritm(), graph, graph.getEdges());
+                        minSpanningTreesKruskal = component.getDecisions();
+                        //paintMinSpanningTree(5, minSpanningTreesKruskal, Color.RED);
                     }
                 }
             }
@@ -109,16 +104,13 @@ public class WindowForIntervalGraph extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 if (isGraphPainted) {
                     if (!isMinSpanningTreePaintedPrim) {
-                        minSpanningTreePrim = GraphAlghoritms.returnMinSpanningTreePrim(graph);
-                        paintMinSpanningTree(-5, minSpanningTreePrim, Color.BLUE);
+                        IntervalGraph startGraph = new IntervalGraph();
+                        startGraph.addVertex(graph.getVertices().get((int) Math.random()*graph.getVertices().size() + 1));
+                        DecisionComponent component = new DecisionComponent(1, new IntervalPrimAlghoritm(), startGraph, graph.getEdges());
+                        minSpanningTreesPrim = new ArrayList<>(new HashSet<>(component.getDecisions()));
+                        //paintMinSpanningTree(-5, minSpanningTreesPrim, Color.BLUE);
                     }
                 }
-            }
-        });
-        exactGraphButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                mainWindow.paint(g);
             }
         });
         if (!isGraphPainted) {
@@ -131,34 +123,25 @@ public class WindowForIntervalGraph extends JFrame {
         if (quantityOfVertices == null) {
             return;
         }
-        graph = new Graph(quantityOfVertices, sizeX, sizeY);
+        graph = new IntervalGraph(quantityOfVertices, sizeX, sizeY);
         for (Vertex vertex : graph.getVertices().values()) {
             g.fillOval(vertex.getX(), vertex.getY(), 5, 5);
             g.drawString(vertex.toString(), vertex.getX(), vertex.getY() + 20);
         }
         int x1, y1, x2, y2;
         g.setColor(Color.gray);
-        for (Edge edge : graph.getEdges()) {
+        for (IntervalEdge edge : graph.getEdges()) {
             x1 = edge.getA().getX();
             y1 = edge.getA().getY();
             x2 = edge.getB().getX();
             y2 = edge.getB().getY();
             graphics2D.drawLine(x1, y1, x2, y2);
-            g.drawString(String.valueOf(edge.getWeight()), (x1 + x2) / 2 - 10, (y1 + y2) / 2 - 10);
+            g.drawString(String.valueOf(edge.getIntervalWeight().getStart() + "-" + edge.getIntervalWeight().getEnd()), (x1 + x2) / 2 - 10, (y1 + y2) / 2 - 10);
         }
         g.setColor(Color.BLACK);
         isGraphPainted = true;
     }
-
-    public void paintTrees(){
-        if (isMinSpanningTreePaintedPrim){
-            paintMinSpanningTree(-5, minSpanningTreePrim, Color.BLUE);
-        }
-        if (isMinSpanningTreePaintedCrascal){
-            paintMinSpanningTree(5, minSpanningTreeCrascal, Color.RED);
-        }
-    }
-
+/*
     public void paintMinSpanningTree(int offset, ArrayList<Edge> minSpanningTree, Color color) {
         if (minSpanningTree == minSpanningTreePrim) {
             if (isMinSpanningTreePaintedPrim) {
@@ -166,11 +149,11 @@ public class WindowForIntervalGraph extends JFrame {
             }
             isMinSpanningTreePaintedPrim = true;
         }
-        if (minSpanningTree == minSpanningTreeCrascal) {
-            if (isMinSpanningTreePaintedCrascal) {
+        if (minSpanningTree == minSpanningTreeKruskal) {
+            if (isMinSpanningTreePaintedKruskal) {
                 return;
             }
-            isMinSpanningTreePaintedCrascal = true;
+            isMinSpanningTreePaintedKruskal = true;
         }
         int x1, x2, y1, y2;
         graphics2D.setColor(color);
@@ -187,5 +170,5 @@ public class WindowForIntervalGraph extends JFrame {
             graphics2D.drawString("(" + (i + 1) + ": " + edge.getWeight() + ")", (x1 + x2) / 2 + 5 * offset, (y1 + y2) / 2 - 20);
         }
         graphics2D.setColor(Color.BLACK);
-    }
+    }*/
 }

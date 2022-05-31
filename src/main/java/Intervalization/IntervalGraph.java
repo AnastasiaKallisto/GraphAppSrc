@@ -10,6 +10,11 @@ public class IntervalGraph {
     private ArrayList<IntervalEdge> edges;
     private Map<Integer, Vertex> vertices;
 
+    public IntervalGraph(){
+        vertices = new TreeMap<>();
+        edges = new ArrayList<>();
+    }
+
     public IntervalGraph(int n, int sizeFrameX, int sizeFrameY) {
         vertices = new TreeMap<>();
         edges = new ArrayList<>();
@@ -36,7 +41,10 @@ public class IntervalGraph {
             if (firstNumber != secondNumber) {
                 start = (int) (Math.random() * 100 + 1);
                 end = start + (int) (Math.random() * 100 + 1);
-                edges.add(new IntervalEdge(vertices.get(firstNumber), vertices.get(secondNumber), start, end));
+                IntervalEdge edge = new IntervalEdge(vertices.get(firstNumber), vertices.get(secondNumber), start, end);
+                if (!edges.contains(edge)){
+                    edges.add(edge);
+                }
             }
         }
     }
@@ -69,5 +77,9 @@ public class IntervalGraph {
             vertices.putIfAbsent(edge.getA().getNumber(),edge.getA());
             vertices.putIfAbsent(edge.getB().getNumber(),edge.getB());
         }
+    }
+
+    public void addVertex(Vertex vertex){
+        vertices.putIfAbsent(vertex.getNumber(), vertex);
     }
 }

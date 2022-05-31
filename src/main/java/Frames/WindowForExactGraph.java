@@ -18,10 +18,6 @@ public class WindowForExactGraph extends JFrame {
     private JButton clearButton;
     private JPanel buttonsPanel;
 
-    private JPanel tabs;
-    private JButton exactGraphButton;
-    private JButton intervalGraphButton;
-
     private Graphics2D graphics2D;
 
     private static Integer quantityOfVertices;
@@ -31,24 +27,16 @@ public class WindowForExactGraph extends JFrame {
     private boolean isGraphPainted;
     private boolean isMinSpanningTreePaintedCrascal;
     private boolean isMinSpanningTreePaintedPrim;
-    private MainWindow mainWindow;
-/*
+
     public static void main(String[] args) {
         JFrame window = new WindowForExactGraph(); //при создании элемента метод paint вызывается автоматически
-    }*/
+    }
 
-    WindowForExactGraph(MainWindow mainWindow) {
+    WindowForExactGraph() {
         super("Graph Alghoritms");
-        this.mainWindow = mainWindow;
         setSize(sizeX, sizeY);
         quantityOfVertices = null;
         isGraphPainted = false;
-
-        tabs = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        exactGraphButton = new JButton("Точные веса");
-        intervalGraphButton = new JButton("Интервальные веса");
-        tabs.add(exactGraphButton);
-        tabs.add(intervalGraphButton);
 
         enterQuantityFrame = new EnterQuantityFrame(this);
         buttonsPanel = new JPanel(new GridLayout(15, 1, 10, 10));
@@ -61,7 +49,6 @@ public class WindowForExactGraph extends JFrame {
         buttonsPanel.add(crascalButton);
         buttonsPanel.add(clearButton);
 
-        this.getContentPane().add(tabs, BorderLayout.NORTH);
         this.getContentPane().add(buttonsPanel, BorderLayout.WEST);
 
         graph = null;
@@ -115,12 +102,6 @@ public class WindowForExactGraph extends JFrame {
                 }
             }
         });
-        intervalGraphButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                mainWindow.paint(g);
-            }
-        });
         if (!isGraphPainted) {
             paintGraph(g);
         }
@@ -148,15 +129,6 @@ public class WindowForExactGraph extends JFrame {
         }
         g.setColor(Color.BLACK);
         isGraphPainted = true;
-    }
-
-    public void paintTrees(){
-        if (isMinSpanningTreePaintedPrim){
-            paintMinSpanningTree(-5, minSpanningTreePrim, Color.BLUE);
-        }
-        if (isMinSpanningTreePaintedCrascal){
-            paintMinSpanningTree(5, minSpanningTreeCrascal, Color.RED);
-        }
     }
 
     public void paintMinSpanningTree(int offset, ArrayList<Edge> minSpanningTree, Color color) {

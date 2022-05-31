@@ -51,7 +51,7 @@ public class IntervalEdge  {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         IntervalEdge that = (IntervalEdge) o;
-        return vertices.equals(that.vertices) && intervalWeight.equals(that.intervalWeight);
+        return vertices.containsAll(that.vertices);
     }
 
     @Override
