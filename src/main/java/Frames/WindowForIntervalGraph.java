@@ -92,7 +92,7 @@ public class WindowForIntervalGraph extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 if (isGraphPainted) {
                     if (!isMinSpanningTreePaintedKruskal) {
-                        DecisionComponent component = new DecisionComponent(1, new IntervalCrascalAlghoritm(), graph, graph.getEdges());
+                        DecisionComponent component = new DecisionComponent(1, new IntervalCrascalAlghoritm(), new IntervalGraph(), graph.getEdges());
                         minSpanningTreesKruskal = component.getDecisions();
                         //paintMinSpanningTree(5, minSpanningTreesKruskal, Color.RED);
                     }

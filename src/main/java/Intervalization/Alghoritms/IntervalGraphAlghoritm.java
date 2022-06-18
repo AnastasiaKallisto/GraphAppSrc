@@ -13,19 +13,26 @@ public abstract class IntervalGraphAlghoritm {
      *                в некотором роде минимальное ребро)
      * @param edges - все доступные ребра
      * @return - список ребер с подрезанными слева весами
+     * + в этом списке вес выбранного ребра обрезается справа.
+     * если его максимальный вес больше минимальной правой границы,
+     * то он примет ее значение
      * теперь их минимальный вес совпадает или больше, чем минимальный вес ребра minEdge
      */
-    public static List<IntervalEdge> cutEdges(IntervalEdge minEdge, List<IntervalEdge> edges) {
+    public static List<IntervalEdge> cutEdges(IntervalEdge minEdge, int minRightBorder, List<IntervalEdge> edges) {
         List<IntervalEdge> answer = new ArrayList<>(edges);
         answer.sort(IntervalEdge::compareToLeft);
         int leftBorder = minEdge.getIntervalWeight().getStart();
-
-        for (IntervalEdge edge: answer) {
+        for (IntervalEdge edge : answer) {
             if (edge.getIntervalWeight().getStart() < leftBorder) {
                 edge.setStart(leftBorder);
             } else {
                 break;
             }
+        }
+        answer.remove(minEdge);
+        IntervalEdge newMinEdge = new IntervalEdge(minEdge);
+        if (newMinEdge.getIntervalWeight().getEnd() > minRightBorder) {
+            newMinEdge.setEnd(minRightBorder);
         }
         return answer;
     }

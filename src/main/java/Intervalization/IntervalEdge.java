@@ -24,6 +24,10 @@ public class IntervalEdge  {
         intervalWeight = new Interval(interval.getStart(), interval.getEnd());
     }
 
+    public IntervalEdge(IntervalEdge edge){
+        new IntervalEdge(edge.getA(), edge.getB(), edge.getIntervalWeight());
+    }
+
     public Interval getIntervalWeight() {
         return intervalWeight;
     }
@@ -31,6 +35,12 @@ public class IntervalEdge  {
     public void setStart(int s){
         if (s<intervalWeight.getEnd()){
             intervalWeight = new Interval(s, intervalWeight.getEnd()); // не будет ли тут ошибки....?
+        }
+    }
+
+    public void setEnd(int e){
+        if (e>intervalWeight.getStart()){
+            intervalWeight = new Interval(intervalWeight.getStart(), e); // не будет ли тут ошибки....?
         }
     }
 

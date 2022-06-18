@@ -18,45 +18,52 @@ public class DecisionComponent {
                              IntervalGraph graph,
                              List<IntervalEdge> availableEdges) {
         this.nextComponents = new ArrayList<>();
-        minSpanningTree = null;
-        this.probability = probability;
-        //где-то тут считается нормально вероятность
-        // кстати, если она слишком маленькая, можно на этом закончить создание объекта
-        IntervalGraph helpGraph;
-        List<IntervalEdge> helpListOfAvailableEdges;
 
         // Теперь получим множество следующих потенциальных ребер, множество Q
+        List<IntervalEdge> Q = alghoritm.getNextEdges(graph, availableEdges);
         // и поработаем с ним - посмотрим, что там будет дальше
-        for (IntervalEdge edge: alghoritm.getNextEdges(graph, availableEdges)) {
-            helpGraph = new IntervalGraph(graph);
-            helpListOfAvailableEdges = new ArrayList<>(availableEdges);
-            // в граф добавили ребро
+        for (IntervalEdge edge: Q) {
+            IntervalGraph helpGraph = new IntervalGraph(graph);
+            // формируем новый вариант графа, в который добавили ребро
             helpGraph.addEdge(edge);
+            // отсортируем рёбра по правой границе
+            Q.sort(IntervalEdge::compareToRight);
+            // найдем минимальную правую границу среди правых границ рёбер из Q
+            int minRightBorder = Q.get(0).getIntervalWeight().getEnd();
+            // подрезаем веса ребер из Q
+            Q = IntervalGraphAlghoritm.cutEdges(edge, minRightBorder, Q);
+            // рассчитываем вероятность выбрать именно это ребро из Q с учетом весов на данном этапе
+            this.probability = getProbability(probability, edge, Q);
             // это ребро больше не появится в списке доступных
+            List<IntervalEdge> helpListOfAvailableEdges = new ArrayList<>(availableEdges);
             helpListOfAvailableEdges.remove(edge);
-            // подрезаем ребра
-            helpListOfAvailableEdges = IntervalGraphAlghoritm.cutEdges(edge, helpListOfAvailableEdges);
+            // сравнение рёбер на равенство идет только по вершинам
+            helpListOfAvailableEdges.removeAll(Q);
+            // мы удалили рёбра и добавили их же, но уже с другими весами
+            helpListOfAvailableEdges.addAll(Q);
             // создаем новый компонент решения со своим новым начальным графом и новым множеством доступных ребер
             nextComponents.add(new DecisionComponent(probability, alghoritm, helpGraph, helpListOfAvailableEdges));
         }
-        // т.е. мы один раз вызвали конструктор и задали сразу все дерево решений
-        // промежуточные результаты хранить незачем, но исправить это несложно,
-        // достаточно поменять название minSpanningTree на более подходящее и убрать условие (ниже)
+        minSpanningTree = null;
         if (nextComponents.size() == 0){
             minSpanningTree = graph;
         }
     }
 
-    public double getProbability() {
-        return probability;
+    public double getProbability(double probability, IntervalEdge edge, List<IntervalEdge> Q) {
+        //сейчас именно это - главная задача
+        return this.probability;
     }
 
     public ArrayList<IntervalGraph> getDecisions(){
-        ArrayList<IntervalGraph> graphs = new ArrayList<>(); // множество деревьев, из них формируется ответ на задачу
-        if (this.nextComponents.size() == 0){
-            graphs.add(this.minSpanningTree); // добавляем дерево из листа
+        // формируем множество деревьев, из них формируется ответ на задачу
+        ArrayList<IntervalGraph> graphs = new ArrayList<>();
+        if (this.minSpanningTree != null){
+            // если это лист, добавляем дерево из листа
+            graphs.add(this.minSpanningTree);
         }
-        for (DecisionComponent decisionComponent: nextComponents){ // закапываемся вглубь, мы не в листе, решений пока не видно
+        // если мы не в листе дерева решений, закапываемся вглубь
+        for (DecisionComponent decisionComponent: nextComponents){
             graphs.addAll(decisionComponent.getDecisions());
         }
         return graphs;
