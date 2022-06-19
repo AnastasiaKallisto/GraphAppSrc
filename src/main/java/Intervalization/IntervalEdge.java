@@ -25,7 +25,10 @@ public class IntervalEdge  {
     }
 
     public IntervalEdge(IntervalEdge edge){
-        new IntervalEdge(edge.getA(), edge.getB(), edge.getIntervalWeight());
+        vertices = new ArrayList<>();
+        vertices.add(edge.getA());
+        vertices.add(edge.getB());
+        intervalWeight = new Interval(edge.getIntervalWeight().getStart(), edge.getIntervalWeight().getEnd());
     }
 
     public Interval getIntervalWeight() {

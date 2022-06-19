@@ -9,15 +9,18 @@ import java.util.*;
 public class IntervalGraph {
     private ArrayList<IntervalEdge> edges;
     private Map<Integer, Vertex> vertices;
+    private double probability;
 
     public IntervalGraph(){
         vertices = new TreeMap<>();
         edges = new ArrayList<>();
+        probability = 1;
     }
 
     public IntervalGraph(int n, int sizeFrameX, int sizeFrameY) {
         vertices = new TreeMap<>();
         edges = new ArrayList<>();
+        probability = 1;
         generateVertices(n, sizeFrameX, sizeFrameY);
         int quantityOfActedVertices = 2;
         int firstNumber, secondNumber;
@@ -52,6 +55,7 @@ public class IntervalGraph {
     public IntervalGraph(IntervalGraph graph){
         this.edges = new ArrayList<>(graph.getEdges());
         this.vertices = new TreeMap<>(graph.getVertices());
+        this.probability = graph.probability;
     }
 
     private void generateVertices(int n, int sizeFrameX, int sizeFrameY) {
@@ -61,6 +65,14 @@ public class IntervalGraph {
         for (int i = 1; i <= n; i++) {
             vertices.put(i, new Vertex((int) (centerX + radius * Math.cos(i * Math.PI * 2 / n)), (int) (centerY + radius * Math.sin(i * Math.PI * 2 / n)), i));
         }
+    }
+
+    public void setProbability(double probability) {
+        this.probability = probability;
+    }
+
+    public double getProbability() {
+        return probability;
     }
 
     public ArrayList<IntervalEdge> getEdges() {

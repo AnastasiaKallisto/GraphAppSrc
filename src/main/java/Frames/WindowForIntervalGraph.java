@@ -107,7 +107,12 @@ public class WindowForIntervalGraph extends JFrame {
                         IntervalGraph startGraph = new IntervalGraph();
                         startGraph.addVertex(graph.getVertices().get((int) Math.random()*graph.getVertices().size() + 1));
                         DecisionComponent component = new DecisionComponent(1, new IntervalPrimAlghoritm(), startGraph, graph.getEdges());
-                        minSpanningTreesPrim = new ArrayList<>(new HashSet<>(component.getDecisions()));
+                        minSpanningTreesPrim = new ArrayList<>(component.getDecisions());
+                        double probabilitySum = 0;
+                        for(IntervalGraph graph: minSpanningTreesPrim){
+                            probabilitySum+= graph.getProbability();
+                        }
+                        System.out.println(probabilitySum);
                         //paintMinSpanningTree(-5, minSpanningTreesPrim, Color.BLUE);
                     }
                 }

@@ -99,9 +99,12 @@ public class Probability {
         // переберем циклом все числа от 1 до 2^(n+1) не включительное, получим их двоичные записи
         // переведем их в массивы, если значение элемента массива 1, то
         // в r можно добавить элемент множества R с таким же индексом и получать множества r
-        int n = Q.size();
+        int n = R.size();
+        if (n == 0){
+            return 1;
+        }
         double answer = 0;
-        for (int i = 1; i < Math.pow(2, n + 1); i++) {
+        for (int i = 1; i < Math.pow(2, n); i++) {
             int[] binarValue = getBinar(i, n);
             Set<Integer> r = new HashSet<>();
             for (int j = 0; j < n; j++) {
@@ -149,7 +152,7 @@ public class Probability {
         String s = Integer.toBinaryString(a);
         int[] answer = new int[n];
         for (int i = 0; i < s.length(); i++) {
-            answer[n - 1 - i] = Character.getNumericValue(s.charAt(n - 1 - i));
+            answer[n - 1 - i] = Character.getNumericValue(s.charAt(s.length() - 1 - i));
         }
         return answer;
     }

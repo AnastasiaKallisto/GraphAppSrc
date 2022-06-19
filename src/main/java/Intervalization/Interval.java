@@ -4,12 +4,12 @@ public class Interval {
     private int start;
     private int end;
 
-    Interval() {
+    public Interval() {
         start = 0;
         end = 0;
     }
 
-    Interval(int s, int e) {
+    public Interval(int s, int e) {
         start = s;
         end = e;
     }
