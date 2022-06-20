@@ -16,7 +16,7 @@ public class IntervalPrimAlghoritm extends IntervalGraphAlghoritm{
      */
 
     @Override
-    public List<IntervalEdge> getNextEdges(IntervalGraph graph, List<IntervalEdge> availableEdges) {
+    public List<IntervalEdge> getQ(IntervalGraph graph, List<IntervalEdge> availableEdges) {
         // те ребра, которые нужно убрать
         List<IntervalEdge> needToBeRemoved = new ArrayList<>();
         // найдём все инцидентные на данный момент рёбра
@@ -43,7 +43,7 @@ public class IntervalPrimAlghoritm extends IntervalGraphAlghoritm{
         // это будет множество Q
         List<IntervalEdge> answer = new ArrayList<>();
         for (IntervalEdge edge: incidentEdges) {
-            if (edge.getIntervalWeight().getStart() <= minRightBorder){
+            if (edge.getIntervalWeight().getStart() < minRightBorder){
                 answer.add(edge);
             }
         }

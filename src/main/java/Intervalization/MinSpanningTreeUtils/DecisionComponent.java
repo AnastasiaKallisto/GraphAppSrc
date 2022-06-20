@@ -22,9 +22,10 @@ public class DecisionComponent {
                              List<IntervalEdge> availableEdges) {
         this.nextComponents = new ArrayList<>();
         this.probability = probability;
-
+        List<IntervalEdge> availableEdgesForNextComponents = new ArrayList<>(availableEdges);
         // Теперь получим множество следующих потенциальных ребер, множество Q
-        List<IntervalEdge> Q = alghoritm.getNextEdges(graph, availableEdges);
+        // Также внутри этой функции удаляются из списка все рёбра, которые могли бы дать цикл
+        List<IntervalEdge> Q = alghoritm.getQ(graph, availableEdgesForNextComponents);
         if (Q.size()!= 0) {
             // отсортируем рёбра из Q по правой границе
             Q.sort(IntervalEdge::compareToRight);
@@ -40,7 +41,6 @@ public class DecisionComponent {
                 IntervalGraph helpGraph = new IntervalGraph(graph);
                 // формируем новый вариант графа, в который добавили это ребро
                 helpGraph.addEdge(edge);
-                // подрезаем веса ребер из Q - подрезка слева и ребра edge - справа
                 // формируется Q1 на основе Q, для каждого ребра подрезки могут быть разными
                 List<IntervalEdge> Q1 = IntervalGraphAlghoritm.cutEdges(edge, minRightBorder, Q);
                 // Формируем разбиение веса ребра edge
@@ -48,7 +48,7 @@ public class DecisionComponent {
                 // рассчитываем вероятность выбрать именно это ребро из Q1 с учетом весов на данном этапе
                 this.probability = getProbability(probability, edge, partitionOfEdgeWeight, Q1);
                 // это ребро больше не появится в списке доступных
-                List<IntervalEdge> helpListOfAvailableEdges = new ArrayList<>(availableEdges);
+                List<IntervalEdge> helpListOfAvailableEdges = new ArrayList<>(availableEdgesForNextComponents);
                 helpListOfAvailableEdges.remove(edge);
                 // сравнение рёбер на равенство идет только по вершинам,
                 // веса ребер при проверке на равенство значения не имеют
@@ -56,13 +56,25 @@ public class DecisionComponent {
                 // мы удалили рёбра и добавили их же, но уже с другими весами
                 helpListOfAvailableEdges.addAll(Q1);
                 // создаем новый компонент решения со своим новым начальным графом и новым множеством доступных ребер
-                nextComponents.add(new DecisionComponent(probability, alghoritm, helpGraph, helpListOfAvailableEdges));
+                nextComponents.add(new DecisionComponent(this.probability, alghoritm, helpGraph, helpListOfAvailableEdges));
             }
         }
         minSpanningTree = null;
         if (nextComponents.size() == 0){
-            minSpanningTree = graph;
+            minSpanningTree = new IntervalGraph(graph);
             minSpanningTree.setProbability(this.probability);
+            StringBuilder s = new StringBuilder();
+            for (IntervalEdge edge: minSpanningTree.getEdges()) {
+                s.append("\n V");
+                s.append(edge.getA().getNumber());
+                s.append(" V");
+                s.append(edge.getB().getNumber());
+                s.append(": ");
+                s.append(edge.getIntervalWeight().getStart());
+                s.append(" - ");
+                s.append(edge.getIntervalWeight().getEnd());
+            }
+            System.out.println("\n вероятность " + minSpanningTree.getProbability() + "\n" + s);
         }
     }
 

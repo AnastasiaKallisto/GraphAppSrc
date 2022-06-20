@@ -1,8 +1,9 @@
 package Frames;
 
 import GraphWork.*;
-import Intervalization.Alghoritms.IntervalCrascalAlghoritm;
+import Intervalization.Alghoritms.IntervalKruskalAlghoritm;
 import Intervalization.Alghoritms.IntervalPrimAlghoritm;
+import Intervalization.Interval;
 import Intervalization.IntervalEdge;
 import Intervalization.IntervalGraph;
 import Intervalization.MinSpanningTreeUtils.DecisionComponent;
@@ -11,6 +12,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.*;
 import java.util.*;
 import java.util.List;
 
@@ -18,6 +20,7 @@ public class WindowForIntervalGraph extends JFrame {
     private static final int sizeX = Toolkit.getDefaultToolkit().getScreenSize().width;
     private static final int sizeY = Toolkit.getDefaultToolkit().getScreenSize().height;
     private EnterQuantityFrame enterQuantityFrame;
+    private JButton drawGraphFromFileButton;
     private JButton generateGraphButton;
     private JButton primButton;
     private JButton kruskalButton;
@@ -48,10 +51,12 @@ public class WindowForIntervalGraph extends JFrame {
 
         enterQuantityFrame = new EnterQuantityFrame(this);
         buttonsPanel = new JPanel(new GridLayout(15, 1, 10, 10));
-        generateGraphButton = new JButton("Нарисовать граф");
+        drawGraphFromFileButton = new JButton("Нарисовать граф из файла .txt");
+        generateGraphButton = new JButton("Нарисовать случайный граф");
         primButton = new JButton("Запустить алгоритм Прима");
         kruskalButton = new JButton("Запустить алгоритм Краскала");
         clearButton = new JButton("Очистить");
+        buttonsPanel.add(drawGraphFromFileButton);
         buttonsPanel.add(generateGraphButton);
         buttonsPanel.add(primButton);
         buttonsPanel.add(kruskalButton);
@@ -70,21 +75,60 @@ public class WindowForIntervalGraph extends JFrame {
         isMinSpanningTreePaintedKruskal = false;
         isMinSpanningTreePaintedPrim = false;
         graphics2D = (Graphics2D) getGraphics();
+        drawGraphFromFileButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (!isGraphPainted) {
+                    JFileChooser fileopen = new JFileChooser();
+                    int ret = fileopen.showDialog(null, "Открыть файл");
+                    if (ret == JFileChooser.APPROVE_OPTION) {
+                        File file = fileopen.getSelectedFile();
+                        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"))) {
+                            quantityOfVertices = Integer.parseInt(br.readLine());
+                            graph = new IntervalGraph();
+                            graph.generateVertices(quantityOfVertices, sizeX, sizeY);
+                            String[] stringArray;
+                            int a, b, startWeight, endWeight;
+                            for (int i = 0; i < quantityOfVertices; i++) {
+                                stringArray = br.readLine().split(" ");
+                                a = Integer.parseInt(stringArray[0]);
+                                b = Integer.parseInt(stringArray[1]);
+                                startWeight = Integer.parseInt(stringArray[2]);
+                                endWeight = Integer.parseInt(stringArray[3]);
+                                Vertex v1 = graph.getVertices().get(a);
+                                Vertex v2 = graph.getVertices().get(b);
+                                graph.addEdge(new IntervalEdge(v1, v2, new Interval(startWeight, endWeight)));
+
+                            }
+                        } catch (Exception ex) {
+                            System.out.println(ex.getMessage());
+                        }
+                    }
+                }
+                isGraphPainted = true;
+                repaint();
+            }
+        });
         generateGraphButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (!isGraphPainted) {
                     enterQuantityFrame.setVisible(true);
                     quantityOfVertices = enterQuantityFrame.getQuantity();
+                    if (quantityOfVertices == null) {
+                        return;
+                    }
+                    graph = new IntervalGraph(quantityOfVertices, sizeX, sizeY);
                 }
             }
         });
         clearButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                repaint();
                 isGraphPainted = false;
                 enterQuantityFrame.setQuantityNull(); // костыль
+                graph = null;
+                repaint();
             }
         });
         kruskalButton.addActionListener(new ActionListener() {
@@ -92,9 +136,36 @@ public class WindowForIntervalGraph extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 if (isGraphPainted) {
                     if (!isMinSpanningTreePaintedKruskal) {
-                        DecisionComponent component = new DecisionComponent(1, new IntervalCrascalAlghoritm(), new IntervalGraph(), graph.getEdges());
+                        DecisionComponent component = new DecisionComponent(1, new IntervalKruskalAlghoritm(), new IntervalGraph(), graph.getEdges());
                         minSpanningTreesKruskal = component.getDecisions();
-                        //paintMinSpanningTree(5, minSpanningTreesKruskal, Color.RED);
+                        ArrayList<IntervalGraph> allDecisions = component.getDecisions();
+                        double probabilitySum = 0;
+                        for (IntervalGraph graph : allDecisions) {
+                            probabilitySum += graph.getProbability();
+                        }
+                        System.out.println(probabilitySum);
+                        minSpanningTreesKruskal = new ArrayList<>();
+                        for(IntervalGraph intervalGraph: allDecisions){
+                            if (minSpanningTreesKruskal.contains(intervalGraph)){
+                                int index = minSpanningTreesKruskal.indexOf(intervalGraph);
+                                minSpanningTreesKruskal.get(index).setProbability(intervalGraph.getProbability() + minSpanningTreesKruskal.get(index).getProbability());
+                            } else {
+                                minSpanningTreesKruskal.add(intervalGraph);
+                            }
+                        }
+                        for (IntervalGraph intervalGraph: minSpanningTreesKruskal){
+                            for (IntervalEdge edge: intervalGraph.getEdges()){
+                                int indexOfGraphEdge = graph.getEdges().indexOf(edge);
+                                Interval graphEdgeWeight = graph.getEdges().get(indexOfGraphEdge).getIntervalWeight();
+                                edge.setStart(graphEdgeWeight.getStart());
+                                edge.setEnd(graphEdgeWeight.getEnd());
+                            }
+                        }
+                        probabilitySum = 0;
+                        for (IntervalGraph graph : minSpanningTreesKruskal) {
+                            probabilitySum += graph.getProbability();
+                        }
+                        System.out.println(probabilitySum);
                     }
                 }
             }
@@ -105,12 +176,34 @@ public class WindowForIntervalGraph extends JFrame {
                 if (isGraphPainted) {
                     if (!isMinSpanningTreePaintedPrim) {
                         IntervalGraph startGraph = new IntervalGraph();
-                        startGraph.addVertex(graph.getVertices().get((int) Math.random()*graph.getVertices().size() + 1));
+                        startGraph.addVertex(graph.getVertices().get((int) Math.random() * graph.getVertices().size() + 1));
                         DecisionComponent component = new DecisionComponent(1, new IntervalPrimAlghoritm(), startGraph, graph.getEdges());
-                        minSpanningTreesPrim = new ArrayList<>(component.getDecisions());
+                        ArrayList<IntervalGraph> allDecisions = component.getDecisions();
                         double probabilitySum = 0;
-                        for(IntervalGraph graph: minSpanningTreesPrim){
-                            probabilitySum+= graph.getProbability();
+                        for (IntervalGraph graph : allDecisions) {
+                            probabilitySum += graph.getProbability();
+                        }
+                        System.out.println(probabilitySum);
+                        minSpanningTreesPrim = new ArrayList<>();
+                        for(IntervalGraph intervalGraph: allDecisions){
+                            if (minSpanningTreesPrim.contains(intervalGraph)){
+                                int index = minSpanningTreesPrim.indexOf(intervalGraph);
+                                minSpanningTreesPrim.get(index).setProbability(intervalGraph.getProbability() + minSpanningTreesPrim.get(index).getProbability());
+                            } else {
+                                minSpanningTreesPrim.add(intervalGraph);
+                            }
+                        }
+                        for (IntervalGraph intervalGraph: minSpanningTreesPrim){
+                            for (IntervalEdge edge: intervalGraph.getEdges()){
+                                int indexOfGraphEdge = graph.getEdges().indexOf(edge);
+                                Interval graphEdgeWeight = graph.getEdges().get(indexOfGraphEdge).getIntervalWeight();
+                                edge.setStart(graphEdgeWeight.getStart());
+                                edge.setEnd(graphEdgeWeight.getEnd());
+                            }
+                        }
+                        probabilitySum = 0;
+                        for (IntervalGraph graph : minSpanningTreesPrim) {
+                            probabilitySum += graph.getProbability();
                         }
                         System.out.println(probabilitySum);
                         //paintMinSpanningTree(-5, minSpanningTreesPrim, Color.BLUE);
@@ -118,17 +211,12 @@ public class WindowForIntervalGraph extends JFrame {
                 }
             }
         });
-        if (!isGraphPainted) {
+        if (graph != null) {
             paintGraph(g);
         }
     }
 
     public void paintGraph(Graphics g) {
-        quantityOfVertices = enterQuantityFrame.getQuantity();
-        if (quantityOfVertices == null) {
-            return;
-        }
-        graph = new IntervalGraph(quantityOfVertices, sizeX, sizeY);
         for (Vertex vertex : graph.getVertices().values()) {
             g.fillOval(vertex.getX(), vertex.getY(), 5, 5);
             g.drawString(vertex.toString(), vertex.getX(), vertex.getY() + 20);

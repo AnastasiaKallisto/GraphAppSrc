@@ -9,9 +9,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class IntervalCrascalAlghoritm extends IntervalGraphAlghoritm{
+public class IntervalKruskalAlghoritm extends IntervalGraphAlghoritm{
     @Override
-    public List<IntervalEdge> getNextEdges(IntervalGraph graph, List<IntervalEdge> availableEdges) {
+    public List<IntervalEdge> getQ(IntervalGraph graph, List<IntervalEdge> availableEdges) {
         List<IntervalEdge> needToBeRemoved = new ArrayList<>();
         List<IntervalEdge> answer = new ArrayList<>();
         availableEdges.sort(IntervalEdge::compareToRight);
@@ -20,10 +20,10 @@ public class IntervalCrascalAlghoritm extends IntervalGraphAlghoritm{
         // идем по порядку. Если встречаем ребро, которое дает цикл,
         // вносим его в список тех, что нужно убрать
         // Если ребро не дает цикл - оно то, что нам нужно.
+        // Когда нашли это ребро, можно удалить все ребра, что дают цикл, которые уже нашли
         for (IntervalEdge edge: availableEdges){
             if (!searchCircle(edge.getA(),edge.getB(), graph, new HashSet<>())){
                 answer.add(edge);
-                needToBeRemoved.add(edge);
                 minRightBorder = edge.getIntervalWeight().getEnd();
                 break;
             } else {
@@ -36,7 +36,7 @@ public class IntervalCrascalAlghoritm extends IntervalGraphAlghoritm{
         availableEdges.sort(IntervalEdge::compareToLeft);
         for (IntervalEdge edge: availableEdges){
             //если левый вес тот что надо
-            if (edge.getIntervalWeight().getStart() <= minRightBorder){
+            if (edge.getIntervalWeight().getStart() < minRightBorder){
                 // если нет цикла
                 if (!searchCircle(edge.getA(),edge.getB(), graph, new HashSet<>())){
                     answer.add(edge);

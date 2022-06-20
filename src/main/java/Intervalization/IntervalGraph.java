@@ -58,7 +58,7 @@ public class IntervalGraph {
         this.probability = graph.probability;
     }
 
-    private void generateVertices(int n, int sizeFrameX, int sizeFrameY) {
+    public void generateVertices(int n, int sizeFrameX, int sizeFrameY) {
         int centerX = sizeFrameX / 2;
         int centerY = sizeFrameY / 2;
         int radius = (int) (centerY * 0.9);
