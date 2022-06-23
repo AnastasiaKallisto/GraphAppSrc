@@ -1,10 +1,17 @@
 package GraphWork;
 
+import Intervalization.IntervalEdge;
+
 import java.util.*;
 
 public class Graph {
     private Set<Edge> edges;
     private Map<Integer, Vertex> vertices;
+
+    public Graph(){
+        vertices = new TreeMap<>();
+        edges = new HashSet<>();
+    }
 
     public Graph(int n, int sizeFrameX, int sizeFrameY) {
         vertices = new TreeMap<>();
@@ -15,9 +22,12 @@ public class Graph {
         edges.add(new Edge(vertices.get(1), vertices.get(2), (int) (Math.random() * 100 + 1)));
         // создаем дерево
         while (quantityOfActedVertices < n) {
-            firstNumber = (int) Math.floor(Math.random() * quantityOfActedVertices) + 1; // задейств. вершина
-            secondNumber = ++quantityOfActedVertices; // новая вершина
-            edges.add(new Edge(vertices.get(firstNumber), vertices.get(secondNumber), (int) (Math.random() * 100 + 1)));
+            // задейств. вершина
+            firstNumber = (int) Math.floor(Math.random() * quantityOfActedVertices) + 1;
+            // новая вершина
+            secondNumber = ++quantityOfActedVertices;
+            edges.add(new Edge(vertices.get(firstNumber), vertices.get(secondNumber),
+                    (int) (Math.random() * 100 + 1)));
         }
         //усложним граф
         int randomQuantity = (int) (Math.random() * 2 * n) + 1;
@@ -25,12 +35,13 @@ public class Graph {
             firstNumber = (int) Math.floor(Math.random() * n) + 1;
             secondNumber = (int) Math.floor(Math.random() * n) + 1;
             if (firstNumber != secondNumber) {
-                edges.add(new Edge(vertices.get(firstNumber), vertices.get(secondNumber), (int) (Math.random() * 100 + 1)));
+                edges.add(new Edge(vertices.get(firstNumber), vertices.get(secondNumber),
+                        (int) (Math.random() * 100 + 1)));
             }
         }
     }
 
-    private void generateVertices(int n, int sizeFrameX, int sizeFrameY) {
+    public void generateVertices(int n, int sizeFrameX, int sizeFrameY) {
         int centerX = sizeFrameX / 2;
         int centerY = sizeFrameY / 2;
         int radius = (int) (centerY * 0.9);
@@ -45,5 +56,13 @@ public class Graph {
 
     public Map<Integer, Vertex> getVertices() {
         return vertices;
+    }
+
+    public void addEdge(Edge edge){
+        if (!edges.contains(edge)){
+            edges.add(edge);
+           // vertices.putIfAbsent(edge.getA().getNumber(),edge.getA());
+           // vertices.putIfAbsent(edge.getB().getNumber(),edge.getB());
+        }
     }
 }

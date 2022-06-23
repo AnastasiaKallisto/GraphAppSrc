@@ -6,6 +6,7 @@ public class Edge {
     private ArrayList<Vertex> vertices;
     private int weight;
 
+    // конструктор, геттеры для веса, каждой из вершин и геттер для списка вершин
     public Edge(Vertex a, Vertex b, int weight) {
         vertices = new ArrayList<>();
         vertices.add(a);

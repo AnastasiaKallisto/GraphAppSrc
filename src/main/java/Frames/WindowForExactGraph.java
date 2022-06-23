@@ -1,17 +1,25 @@
 package Frames;
 
 import GraphWork.*;
+import Intervalization.Interval;
+import Intervalization.IntervalEdge;
+import Intervalization.IntervalGraph;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.util.*;
 
 public class WindowForExactGraph extends JFrame {
     private static final int sizeX = Toolkit.getDefaultToolkit().getScreenSize().width;
     private static final int sizeY = Toolkit.getDefaultToolkit().getScreenSize().height;
     private EnterQuantityFrame enterQuantityFrame;
+    private JButton drawGraphFromFileButton;
     private JButton generateGraphButton;
     private JButton primButton;
     private JButton crascalButton;
@@ -40,10 +48,12 @@ public class WindowForExactGraph extends JFrame {
 
         enterQuantityFrame = new EnterQuantityFrame(this);
         buttonsPanel = new JPanel(new GridLayout(15, 1, 10, 10));
+        drawGraphFromFileButton = new JButton("Нарисовать граф из файла .txt");
         generateGraphButton = new JButton("Нарисовать граф");
         primButton = new JButton("Запустить алгоритм Прима");
         crascalButton = new JButton("Запустить алгоритм Краскала");
         clearButton = new JButton("Очистить");
+        buttonsPanel.add(drawGraphFromFileButton);
         buttonsPanel.add(generateGraphButton);
         buttonsPanel.add(primButton);
         buttonsPanel.add(crascalButton);
@@ -63,21 +73,61 @@ public class WindowForExactGraph extends JFrame {
         isMinSpanningTreePaintedCrascal = false;
         isMinSpanningTreePaintedPrim = false;
         graphics2D = (Graphics2D) getGraphics();
+        drawGraphFromFileButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (!isGraphPainted) {
+                    JFileChooser fileopen = new JFileChooser();
+                    int ret = fileopen.showDialog(null, "Открыть файл");
+                    if (ret == JFileChooser.APPROVE_OPTION) {
+                        File file = fileopen.getSelectedFile();
+                        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"))) {
+                            quantityOfVertices = Integer.parseInt(br.readLine());
+                            graph = new Graph();
+                            graph.generateVertices(quantityOfVertices, sizeX, sizeY);
+                            String[] stringArray;
+                            int a, b, weight;
+                            for (int i = 0; i < quantityOfVertices; i++) {
+                                stringArray = br.readLine().split(" ");
+                                a = Integer.parseInt(stringArray[0]);
+                                b = Integer.parseInt(stringArray[1]);
+                                weight = Integer.parseInt(stringArray[2]);
+                                Vertex v1 = graph.getVertices().get(a);
+                                Vertex v2 = graph.getVertices().get(b);
+                                graph.addEdge(new Edge(v1, v2, weight));
+
+                            }
+                        } catch (Exception ex) {
+                            System.out.println(ex.getMessage());
+                        }
+                    }
+                }
+                isGraphPainted = true;
+                repaint();
+            }
+        });
         generateGraphButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (!isGraphPainted) {
                     enterQuantityFrame.setVisible(true);
                     quantityOfVertices = enterQuantityFrame.getQuantity();
+                    if (quantityOfVertices == null) {
+                        return;
+                    }
+                    graph = new Graph(quantityOfVertices, sizeX, sizeY);
+                    //isGraphPainted = true;
+                    repaint();
                 }
             }
         });
         clearButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                repaint();
                 isGraphPainted = false;
                 enterQuantityFrame.setQuantityNull(); // костыль
+                graph = null;
+                repaint();
             }
         });
         crascalButton.addActionListener(new ActionListener() {
@@ -102,17 +152,20 @@ public class WindowForExactGraph extends JFrame {
                 }
             }
         });
-        if (!isGraphPainted) {
+        if (graph != null) {
             paintGraph(g);
         }
     }
 
     public void paintGraph(Graphics g) {
-        quantityOfVertices = enterQuantityFrame.getQuantity();
-        if (quantityOfVertices == null) {
+        //quantityOfVertices = enterQuantityFrame.getQuantity();
+        //if (quantityOfVertices == null) {
+        //    return;
+        //}
+        //graph = new Graph(quantityOfVertices, sizeX, sizeY);
+        if (graph == null) {
             return;
         }
-        graph = new Graph(quantityOfVertices, sizeX, sizeY);
         for (Vertex vertex : graph.getVertices().values()) {
             g.fillOval(vertex.getX(), vertex.getY(), 5, 5);
             g.drawString(vertex.toString(), vertex.getX(), vertex.getY() + 20);
